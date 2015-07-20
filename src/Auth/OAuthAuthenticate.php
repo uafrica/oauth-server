@@ -81,11 +81,11 @@ class OAuthAuthenticate extends BaseAuthenticate
             
             //add : to http code for cakephp (header method in Network/Respone expects header separated with double dot notation)
             $headers = $this->_exception->getHttpHeaders();
-            $code = (string)$this->_exception->httpStatusCode;
-            $headers = array_map(function($header)use($code) {
+            $code = (string) $this->_exception->httpStatusCode;
+            $headers = array_map(function($header) use($code) {
             	$pos = strpos($header, $code);
-            	if( $pos !== -1 ) {
-            		return substr($header, 0, $pos + strlen($code) ) . ':' . substr($header, $pos + strlen($code) + 1);
+            	if($pos !== -1) {
+            		return substr($header ,0 ,$pos + strlen($code)) . ':' . substr($header, $pos + strlen($code) + 1);
             	}
             	return $header;
             }, $headers);
