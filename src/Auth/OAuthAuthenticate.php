@@ -84,7 +84,7 @@ class OAuthAuthenticate extends BaseAuthenticate
             $code = (string)$this->_exception->httpStatusCode;
             $headers = array_map(function($header)use($code) {
             	$pos = strpos($header, $code);
-            	if( $pos !== -1 ){
+            	if( $pos !== -1 ) {
             		return substr($header, 0, $pos + strlen($code) ) . ':' . substr($header, $pos + strlen($code) + 1);
             	}
             	return $header;
