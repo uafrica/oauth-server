@@ -2,8 +2,8 @@
 
 namespace OAuthServer\Model\Table;
 
-use Cake\ORM\Table;
 use Cake\Database\Schema\Table as SchemaTable;
+use Cake\ORM\Table;
 
 /**
  * RefreshToken Model
@@ -22,20 +22,19 @@ class RefreshTokensTable extends Table
         $this->table('oauth_refresh_tokens');
         $this->primaryKey('refresh_token');
         $table = new SchemaTable(null);
-        $table
-        	->addColumn('refresh_token', [
-        		'type' => 'string',
-        		'length' => 40,
-        		'null' => false
-        	])->addColumn('oauth_token', [
-        		'type' => 'string',
-        		'length' => 40,
-        		'null' => false
-        	])->addColumn('expires', [
-        		'type' => 'integer',
-        		'length' => 11,
-        		'null' => false
-        	]);
+        $table->addColumn('refresh_token', [
+            'type' => 'string',
+            'length' => 40,
+            'null' => false
+        ])->addColumn('oauth_token', [
+            'type' => 'string',
+            'length' => 40,
+            'null' => false
+        ])->addColumn('expires', [
+            'type' => 'integer',
+            'length' => 11,
+            'null' => false
+        ]);
         $this->schema($table);
         $this->belongsTo('AccessTokens', [
             'className' => 'OAuthServer.AccessTokens',

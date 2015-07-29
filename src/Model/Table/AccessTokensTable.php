@@ -2,8 +2,8 @@
 
 namespace OAuthServer\Model\Table;
 
-use Cake\ORM\Table;
 use Cake\Database\Schema\Table as SchemaTable;
+use Cake\ORM\Table;
 
 /**
  * AccessToken Model
@@ -22,20 +22,19 @@ class AccessTokensTable extends Table
         $this->table('oauth_access_tokens');
         $this->primaryKey('oauth_token');
         $table = new SchemaTable(null);
-        $table
-        	->addColumn('oauth_token', [
-        		'type' => 'string',
-        		'length' => 40,
-        		'null' => false
-        	])->addColumn('session_id', [
-        		'type' => 'integer',
-        		'length' => 11,
-        		'null' => false
-        	])->addColumn('expires', [
-        		'type' => 'integer',
-        		'length' => 11,
-        		'null' => false
-        	]);
+        $table->addColumn('oauth_token', [
+            'type' => 'string',
+            'length' => 40,
+            'null' => false
+        ])->addColumn('session_id', [
+            'type' => 'integer',
+            'length' => 11,
+            'null' => false
+        ])->addColumn('expires', [
+            'type' => 'integer',
+            'length' => 11,
+            'null' => false
+        ]);
         $this->schema($table);
         $this->belongsTo('Sessions', [
             'className' => 'OAuthServer.Sessions',

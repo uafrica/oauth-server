@@ -1,8 +1,8 @@
 <?php
 namespace OAuthServer\Model\Table;
 
-use Cake\ORM\Table;
 use Cake\Database\Schema\Table as SchemaTable;
+use Cake\ORM\Table;
 
 class ScopesTable extends Table
 {
@@ -14,16 +14,15 @@ class ScopesTable extends Table
     {
         $this->table('oauth_scopes');
         $table = new SchemaTable(null);
-        $table
-        	->addColumn('id', [
-        		'type' => 'string',
-        		'length' => 40,
-        		'null' => false
-        	])->addColumn('description', [
-        		'type' => 'string',
-        		'length' => 200,
-        		'null' => false
-        	]);
+        $table->addColumn('id', [
+            'type' => 'string',
+            'length' => 40,
+            'null' => false
+        ])->addColumn('description', [
+            'type' => 'string',
+            'length' => 200,
+            'null' => false
+        ]);
         $this->schema($table);
         $this->hasMany('AccessTokenScopes', [
             'className' => 'OAuthServer.AccessTokenScopes'
