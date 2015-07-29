@@ -13,6 +13,7 @@ class SessionScopesTable extends Table
     public function initialize(array $config)
     {
         $this->table('oauth_session_scopes');
+        $this->primaryKey('id');
         $table = new SchemaTable(null);
         $table->addColumn('id', [
             'type' => 'integer',

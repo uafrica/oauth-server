@@ -14,6 +14,7 @@ class AccessTokenScopesTable extends Table
     public function initialize(array $config)
     {
         $this->table('oauth_access_token_scopes');
+        $this->primaryKey('id');
         $table = new SchemaTable(null);
         $table->addColumn('id', [
                 'type' => 'integer',

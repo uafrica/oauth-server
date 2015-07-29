@@ -13,6 +13,7 @@ class SessionsTable extends Table
     public function initialize(array $config)
     {
         $this->table('oauth_sessions');
+        $this->primaryKey('id');
         $table = new SchemaTable(null);
         $table->addColumn('id', [
             'type' => 'integer',
@@ -58,7 +59,7 @@ class SessionsTable extends Table
         $this->belongsTo('Clients', [
                 'className' => 'OAuthServer.Clients',
                 'foreignKey' => 'client_id'
-            ]);    
+            ]);
         parent::initialize($config);
     }
 }

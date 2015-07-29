@@ -4,7 +4,6 @@ namespace OAuthServer\Model\Table;
 use Cake\Database\Schema\Table as SchemaTable;
 use Cake\ORM\Table;
 
-
 class AuthCodeScopesTable extends Table
 {
     /**
@@ -14,6 +13,7 @@ class AuthCodeScopesTable extends Table
     public function initialize(array $config)
     {
         $this->table('oauth_auth_code_scopes');
+        $this->primaryKey('id');
         $table = new SchemaTable(null);
         $table->addColumn('id', [
             'type' => 'integer',

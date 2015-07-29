@@ -13,6 +13,7 @@ class ScopesTable extends Table
     public function initialize(array $config)
     {
         $this->table('oauth_scopes');
+        $this->primaryKey('id');
         $table = new SchemaTable(null);
         $table->addColumn('id', [
             'type' => 'string',
