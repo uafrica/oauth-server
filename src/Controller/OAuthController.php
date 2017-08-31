@@ -12,6 +12,8 @@ use League\OAuth2\Server\Exception\AccessDeniedException;
 use League\OAuth2\Server\Exception\OAuthException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Util\RedirectUri;
+use App\Controller\AppController;
+use OAuthServer\Model\Entities\UserEntity;
 
 /**
  * Class OAuthController
@@ -48,22 +50,23 @@ class OAuthController extends AppController
         if (!$this->components()->has('Auth')) {
             throw new \RuntimeException("OAuthServer requires Auth component to be loaded and properly configured");
         }
-
+        $this->eventManager()->off($this->Csrf);
+        $this->Security->config('unlockedActions', 'accessToken');
         $this->Auth->allow(['oauth', 'accessToken']);
         $this->Auth->deny(['authorize']);
 
-        if ($this->request->param('action') == 'authorize') {
-            // OAuth spec requires to check OAuth authorize params as a first thing, regardless of whether user is logged in or not.
-            // AuthComponent checks user after beforeFilter by default, this is the place to do it.
-            try {
-                $this->authCodeGrant = $this->OAuth->Server->getGrantType('authorization_code');
-                $this->authParams = $this->authCodeGrant->checkAuthorizeParams();
-            } catch (OAuthException $e) {
-                // ignoring $e->getHttpHeaders() for now
-                // it only sends WWW-Authenticate header in case of InvalidClientException
-                throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
-            }
-        }
+        // if ($this->request->param('action') == 'authorize') {
+        //     // OAuth spec requires to check OAuth authorize params as a first thing, regardless of whether user is logged in or not.
+        //     // AuthComponent checks user after beforeFilter by default, this is the place to do it.
+        //     try {
+        //         $this->authCodeGrant = $this->OAuth->Server->getGrantType('authorization_code');
+        //         $this->authParams = $this->authCodeGrant->checkAuthorizeParams();
+        //     } catch (OAuthException $e) {
+        //         // ignoring $e->getHttpHeaders() for now
+        //         // it only sends WWW-Authenticate header in case of InvalidClientException
+        //         throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
+        //     }
+        // }
     }
 
     /**
@@ -84,6 +87,7 @@ class OAuthController extends AppController
      */
     public function authorize()
     {
+        $authRequest = $this->OAuth->Server->validateAuthorizationRequest($this->request);
         $clientId = $this->request->query('client_id');
         $ownerModel = $this->Auth->config('authenticate.all.userModel');
         $ownerId = $this->Auth->user(Configure::read("OAuthServer.models.{$ownerModel}.id") ?: 'id');
@@ -103,26 +107,29 @@ class OAuthController extends AppController
                 $ownerModel = $event->result['ownerModel'];
             }
         }
+        //
+        // $currentTokens = $this->loadModel('OAuthServer.AccessTokens')
+        //     ->find()
+        //     ->where(['expires > ' => Time::now()->getTimestamp()])
+        //     ->matching('Sessions', function (Query $q) use ($ownerModel, $ownerId, $clientId) {
+        //         return $q->where([
+        //             'owner_model' => $ownerModel,
+        //             'owner_id' => $ownerId,
+        //             'client_id' => $clientId
+        //         ]);
+        //     })
+        //     ->count();
 
-        $currentTokens = $this->loadModel('OAuthServer.AccessTokens')
-            ->find()
-            ->where(['expires > ' => Time::now()->getTimestamp()])
-            ->matching('Sessions', function (Query $q) use ($ownerModel, $ownerId, $clientId) {
-                return $q->where([
-                    'owner_model' => $ownerModel,
-                    'owner_id' => $ownerId,
-                    'client_id' => $clientId
-                ]);
-            })
-            ->count();
-
-        if ($currentTokens > 0 || ($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
-            $redirectUri = $this->authCodeGrant->newAuthorizeRequest($ownerModel, $ownerId, $this->authParams);
+        if (($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
+            $user = new UserEntity();
+            $user->setUserID($ownerId);
+            $authRequest->setUser($user);
+            $authRequest->setAuthorizationApproved(true);
 
             $event = new Event('OAuthServer.afterAuthorize', $this);
             EventManager::instance()->dispatch($event);
 
-            return $this->redirect($redirectUri);
+            return $this->OAuth->Server->completeAuthorizationRequest($authRequest, $this->response);
         } elseif ($this->request->is('post')) {
             $event = new Event('OAuthServer.afterDeny', $this);
             EventManager::instance()->dispatch($event);
@@ -149,10 +156,11 @@ class OAuthController extends AppController
      */
     public function accessToken()
     {
+        $redirectUri = $this->request->getData('redirect_uri');
+        $this->request->data['redirect_uri'] = urldecode($redirectUri);
         try {
-            $response = $this->OAuth->Server->issueAccessToken();
-            $this->set($response);
-            $this->set('_serialize', array_keys($response));
+            $response = $this->OAuth->Server->respondToAccessTokenRequest($this->request, $this->response);
+            return $response;
         } catch (OAuthException $e) {
             // ignoring $e->getHttpHeaders() for now
             // it only sends WWW-Authenticate header in case of InvalidClientException
