@@ -48,7 +48,6 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
             'session_id' => $session->id
         ]);
         $AuthCodes->save($AuthCode);
-
         return ;
 
         // Some logic to persist the auth code to a database
@@ -59,7 +58,10 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      */
     public function revokeAuthCode($codeId)
     {
-        // Some logic to revoke the auth code in a database
+        $AuthCodes = TableRegistry::get('OAuthServer.AuthCodes');
+        $oldAuthCode = $AuthCodes->find()
+        ->where(['code' => $codeId])->first();
+        $AuthCodes->delete($oldAuthCode);
     }
 
     /**
@@ -67,7 +69,9 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      */
     public function isAuthCodeRevoked($codeId)
     {
-        return false; // The auth code has not been revoked
+        $AuthCodes = TableRegistry::get('OAuthServer.AuthCodes');
+        $exists = $AuthCodes->exists(['code' => $codeId]);
+        return !$exists;
     }
 
     /**

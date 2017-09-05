@@ -10,6 +10,7 @@ use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
+use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use OAuthServer\Traits\GetStorageTrait;
 use OAuthServer\Model\Entities\UserEntity;
 use OAuthServer\Model\Repositories\AccessTokenRepository;
@@ -102,7 +103,15 @@ class OAuthComponent extends Component
                 $refreshTokenRepository,
                 new \DateInterval('PT10M')
             ),
-            new \DateInterval('PT1H')
+            new \DateInterval('PT23H')
+        );
+
+        $grant = new RefreshTokenGrant($refreshTokenRepository);
+        $grant->setRefreshTokenTTL(new \DateInterval('P2M')); // The refresh token will expire in 1 month
+
+        $server->enableGrantType(
+            $grant,
+            new \DateInterval('PT23H') // The new access token will expire after 1 hour
         );
 
         $server->enableGrantType(

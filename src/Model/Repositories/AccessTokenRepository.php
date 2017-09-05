@@ -46,7 +46,10 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function revokeAccessToken($tokenId)
     {
-        // Some logic here to revoke the access token
+        $AccessTokens = TableRegistry::get('OAuthServer.AccessTokens');
+        $oldAccessToken = $AccessTokens->find()
+        ->where(['oauth_token' => $tokenId])->first();
+        $AccessTokens->delete($oldAccessToken);
     }
 
     /**
@@ -54,7 +57,9 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function isAccessTokenRevoked($tokenId)
     {
-        return false; // Access token hasn't been revoked
+        $AccessTokens = TableRegistry::get('OAuthServer.AccessTokens');
+        $exists = $AccessTokens->exists(['oauth_token' => $tokenId]);
+        return !$exists;
     }
 
     /**
