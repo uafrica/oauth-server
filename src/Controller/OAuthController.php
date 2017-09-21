@@ -120,7 +120,7 @@ class OAuthController extends AppController
         //     })
         //     ->count();
 
-        if (($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
+        if (($this->request->is('post') && $this->request->data('authorization') === 'Proceed to questionnaire')) {
             $user = new UserEntity();
             $user->setUserID($ownerId);
             $authRequest->setUser($user);
