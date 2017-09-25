@@ -54,19 +54,6 @@ class OAuthController extends AppController
         $this->Security->config('unlockedActions', 'accessToken');
         $this->Auth->allow(['oauth', 'accessToken']);
         $this->Auth->deny(['authorize']);
-
-        // if ($this->request->param('action') == 'authorize') {
-        //     // OAuth spec requires to check OAuth authorize params as a first thing, regardless of whether user is logged in or not.
-        //     // AuthComponent checks user after beforeFilter by default, this is the place to do it.
-        //     try {
-        //         $this->authCodeGrant = $this->OAuth->Server->getGrantType('authorization_code');
-        //         $this->authParams = $this->authCodeGrant->checkAuthorizeParams();
-        //     } catch (OAuthException $e) {
-        //         // ignoring $e->getHttpHeaders() for now
-        //         // it only sends WWW-Authenticate header in case of InvalidClientException
-        //         throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
-        //     }
-        // }
     }
 
     /**
@@ -107,18 +94,6 @@ class OAuthController extends AppController
                 $ownerModel = $event->result['ownerModel'];
             }
         }
-        //
-        // $currentTokens = $this->loadModel('OAuthServer.AccessTokens')
-        //     ->find()
-        //     ->where(['expires > ' => Time::now()->getTimestamp()])
-        //     ->matching('Sessions', function (Query $q) use ($ownerModel, $ownerId, $clientId) {
-        //         return $q->where([
-        //             'owner_model' => $ownerModel,
-        //             'owner_id' => $ownerId,
-        //             'client_id' => $clientId
-        //         ]);
-        //     })
-        //     ->count();
 
         if (($this->request->is('post') && $this->request->data('authorization') === 'Proceed to questionnaire')) {
             $user = new UserEntity();
