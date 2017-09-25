@@ -107,11 +107,11 @@ class OAuthComponent extends Component
         );
 
         $grant = new RefreshTokenGrant($refreshTokenRepository);
-        $grant->setRefreshTokenTTL(new \DateInterval('P2M')); // The refresh token will expire in 1 month
+        $grant->setRefreshTokenTTL(new \DateInterval('P2M')); // The refresh token will expire in 2 month
 
         $server->enableGrantType(
             $grant,
-            new \DateInterval('PT23H') // The new access token will expire after 1 hour
+            new \DateInterval('PT23H') // The new access token will expire after 23 hour
         );
 
         $server->enableGrantType(
