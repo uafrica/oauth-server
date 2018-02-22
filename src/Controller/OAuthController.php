@@ -123,7 +123,9 @@ class OAuthController extends AppController
             EventManager::instance()->dispatch($event);
 
             return $this->redirect($redirectUri);
-        } elseif ($this->request->is('post')) {
+        }
+        
+        if ($this->request->is('post')) {
             $event = new Event('OAuthServer.afterDeny', $this);
             EventManager::instance()->dispatch($event);
 
