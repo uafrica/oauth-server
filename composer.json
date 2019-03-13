@@ -1,5 +1,5 @@
 {
-    "name": "uafrica/oauth-server",
+    "name": "martinusdev/oauth-server",
     "description": "OAuth Server for CakePHP 3 using the PHP League's OAuth2 Server",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "oauth", "oauth2", "oauth server", "oauth2 server"],
