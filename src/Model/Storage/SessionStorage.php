@@ -23,7 +23,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $result = $this->Sessions->find()
             ->matching('AccessTokens', function ($q) use ($accessToken) {
                 return $q->where([
-                            'oauth_token' => $accessToken->getId()
+                            'oauth_token' => $accessToken->getId(),
                         ]);
             })
             ->first();
@@ -49,7 +49,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $result = $this->Sessions->find()
             ->matching('AuthCodes', function ($q) use ($authCode) {
                 return $q->where([
-                            'code' => $authCode->getId()
+                            'code' => $authCode->getId(),
                         ]);
             })
             ->first();
@@ -74,10 +74,10 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $this->loadModel('OAuthServer.SessionScopes');
         $result = $this->SessionScopes->find()
             ->contain([
-                    'Scopes'
+                    'Scopes',
                 ])
             ->where([
-                    'session_id' => $session->getId()
+                    'session_id' => $session->getId(),
                 ])
             ->map(function (Entity $scope) {
                 return (new ScopeEntity($this->server))->hydrate([

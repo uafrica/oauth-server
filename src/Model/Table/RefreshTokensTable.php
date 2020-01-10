@@ -22,7 +22,7 @@ class RefreshTokensTable extends Table
         $this->primaryKey('refresh_token');
         $this->belongsTo('AccessTokens', [
             'className' => 'OAuthServer.AccessTokens',
-            'foreignKey' => 'oauth_token'
+            'foreignKey' => 'oauth_token',
         ]);
         parent::initialize($config);
     }

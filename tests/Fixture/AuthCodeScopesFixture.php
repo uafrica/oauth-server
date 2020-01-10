@@ -12,7 +12,7 @@ class AuthCodeScopesFixture extends TestFixture
         'auth_code' => ['type' => 'string'],
         'scope_id' => ['type' => 'string'],
         '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']]
-        ]
+            'primary' => ['type' => 'primary', 'columns' => ['id']],
+        ],
     ];
 }

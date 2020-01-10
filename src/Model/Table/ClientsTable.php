@@ -25,7 +25,7 @@ class ClientsTable extends Table
         $this->displayField('name');
         $this->hasMany('Sessions', [
             'className' => 'OAuthServer.Sessions',
-            'foreignKey' => 'client_id'
+            'foreignKey' => 'client_id',
         ]);
         parent::initialize($config);
     }

@@ -25,7 +25,7 @@ class AuthCodesTable extends Table
             'Sessions',
             [
                 'className' => 'OAuthServer.Sessions',
-                'foreignKey' => 'session_id'
+                'foreignKey' => 'session_id',
             ]
         );
         $this->hasMany(
@@ -33,7 +33,7 @@ class AuthCodesTable extends Table
             [
                 'className' => 'OAuthServer.AuthCodeScopes',
                 'foreignKey' => 'auth_code',
-                'dependant' => true
+                'dependant' => true,
             ]
         );
         parent::initialize($config);

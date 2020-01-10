@@ -23,7 +23,7 @@ define('APP', ROOT);
 define('CONFIG', $root . DS . 'config' . DS);
 define('TMP', sys_get_temp_dir() . DS);
 
-$loader = new \Cake\Core\ClassLoader;
+$loader = new \Cake\Core\ClassLoader();
 $loader->register();
 $loader->addNamespace('TestApp', APP);
 
@@ -32,8 +32,8 @@ Configure::write('App', [
     'namespace' => 'App',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
-        'templates' => [ROOT . 'Template' . DS]
-    ]
+        'templates' => [ROOT . 'Template' . DS],
+    ],
 ]);
 Cake\Cache\Cache::config([
     '_cake_core_' => [
@@ -47,7 +47,7 @@ Cake\Cache\Cache::config([
         'prefix' => 'cake_model_',
         'serialize' => true,
         'path' => '/tmp',
-    ]
+    ],
 ]);
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite:///:memory:');

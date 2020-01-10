@@ -18,7 +18,7 @@ class OAuthComponentTest extends TestCase
     public function testConfigTokenTTL()
     {
         $component = new OAuthComponent(new ComponentRegistry(), [
-            'accessTokenTTL' => 5
+            'accessTokenTTL' => 5,
         ]);
         $this->assertEquals(5, $component->Server->getAccessTokenTTL());
     }
@@ -39,12 +39,12 @@ class OAuthComponentTest extends TestCase
         $component = new OAuthComponent(new ComponentRegistry(), [
             'supportedGrants' => [
                 'RefreshToken' => [
-                    'refreshTokenTTL' => 4
-                ]
+                    'refreshTokenTTL' => 4,
+                ],
             ],
         ]);
 
-    /** @var RefreshTokenGrant $grant */
+        /** @var RefreshTokenGrant $grant */
         $grant = $component->Server->getGrantType('refresh_token');
         $this->assertEquals(4, $grant->getRefreshTokenTTL());
     }

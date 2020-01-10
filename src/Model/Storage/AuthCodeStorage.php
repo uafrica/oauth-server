@@ -23,7 +23,7 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
         $result = $this->AuthCodes->find()
             ->where([
                 'code' => $code,
-                'expires >=' => time()
+                'expires >=' => time(),
             ])
             ->first();
 
@@ -69,10 +69,10 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
         $this->loadModel('OAuthServer.AuthCodeScopes');
         $result = $this->AuthCodeScopes->find()
             ->contain([
-                'Scopes'
+                'Scopes',
             ])
             ->where([
-                'auth_code' => $token->getId()
+                'auth_code' => $token->getId(),
             ])
             ->map(function (Entity $scope) {
                 return (new ScopeEntity($this->server))->hydrate([
@@ -111,7 +111,7 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
     {
         $this->loadModel('OAuthServer.AuthCodes');
         $this->AuthCodes->deleteAll([
-                'code' => $token->getId()
+                'code' => $token->getId(),
             ]);
     }
 }

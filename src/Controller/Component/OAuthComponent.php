@@ -30,27 +30,27 @@ class OAuthComponent extends Component
         'supportedGrants' => ['AuthCode', 'RefreshToken', 'ClientCredentials', 'Password'],
         'storages' => [
             'session' => [
-                'className' => 'OAuthServer.Session'
+                'className' => 'OAuthServer.Session',
             ],
             'accessToken' => [
-                'className' => 'OAuthServer.AccessToken'
+                'className' => 'OAuthServer.AccessToken',
             ],
             'client' => [
-                'className' => 'OAuthServer.Client'
+                'className' => 'OAuthServer.Client',
             ],
             'scope' => [
-                'className' => 'OAuthServer.Scope'
+                'className' => 'OAuthServer.Scope',
             ],
             'authCode' => [
-                'className' => 'OAuthServer.AuthCode'
+                'className' => 'OAuthServer.AuthCode',
             ],
             'refreshToken' => [
-                'className' => 'OAuthServer.RefreshToken'
-            ]
+                'className' => 'OAuthServer.RefreshToken',
+            ],
         ],
         'authorizationServer' => [
-            'className' => 'League\OAuth2\Server\AuthorizationServer'
-        ]
+            'className' => 'League\OAuth2\Server\AuthorizationServer',
+        ],
     ];
 
     /**

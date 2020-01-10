@@ -15,10 +15,10 @@ class AccessTokenScopesTable extends Table
         $this->table('oauth_access_token_scopes');
         $this->belongsTo('AccessTokens', [
             'className' => 'OAuthServer.AccessTokens',
-            'foreignKey' => 'oauth_token'
+            'foreignKey' => 'oauth_token',
         ]);
         $this->belongsTo('Scopes', [
-            'className' => 'OAuthServer.Scopes'
+            'className' => 'OAuthServer.Scopes',
         ]);
         parent::initialize($config);
     }

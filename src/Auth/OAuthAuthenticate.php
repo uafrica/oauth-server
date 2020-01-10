@@ -38,22 +38,22 @@ class OAuthAuthenticate extends BaseAuthenticate
         'continue' => false,
         'storages' => [
             'session' => [
-                'className' => 'OAuthServer.Session'
+                'className' => 'OAuthServer.Session',
             ],
             'accessToken' => [
-                'className' => 'OAuthServer.AccessToken'
+                'className' => 'OAuthServer.AccessToken',
             ],
             'client' => [
-                'className' => 'OAuthServer.Client'
+                'className' => 'OAuthServer.Client',
             ],
             'scope' => [
-                'className' => 'OAuthServer.Scope'
-            ]
+                'className' => 'OAuthServer.Scope',
+            ],
         ],
         'resourceServer' => [
-            'className' => 'League\OAuth2\Server\ResourceServer'
+            'className' => 'League\OAuth2\Server\ResourceServer',
         ],
-        'contain' => null
+        'contain' => null,
     ];
 
     /**

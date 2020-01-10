@@ -18,7 +18,7 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
         $this->loadModel('OAuthServer.RefreshTokens');
         $result = $this->RefreshTokens->find()
             ->where([
-                'refresh_token' => $token
+                'refresh_token' => $token,
             ])
             ->first();
 
@@ -60,7 +60,7 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
     {
         $this->loadModel('OAuthServer.RefreshTokens');
         $this->RefreshTokens->deleteAll([
-            'refresh_token' => $token->getId()
+            'refresh_token' => $token->getId(),
         ]);
     }
 }

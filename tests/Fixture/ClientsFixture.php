@@ -20,8 +20,8 @@ class ClientsFixture extends TestFixture
         'parent_model' => ['type' => 'string'],
         'parent_id' => ['type' => 'integer'],
         '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']]
-        ]
+            'primary' => ['type' => 'primary', 'columns' => ['id']],
+        ],
     ];
 
     public $records = [
@@ -30,6 +30,6 @@ class ClientsFixture extends TestFixture
             'client_secret' => 'TestSecret',
             'name' => 'Test',
             'redirect_uri' => 'http://www.example.com',
-        ]
+        ],
     ];
 }

@@ -26,7 +26,7 @@ class AccessTokensTable extends Table
         $this->hasMany('AccessTokenScopes', [
             'className' => 'OAuthServer.AccessTokenScopes',
             'foreignKey' => 'oauth_token',
-            'dependant' => true
+            'dependant' => true,
         ]);
         parent::initialize($config);
     }

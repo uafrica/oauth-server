@@ -12,8 +12,8 @@ class SessionScopesFixture extends TestFixture
         'session_id' => ['type' => 'integer'],
         'scope_id' => ['type' => 'string'],
         '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']]
-        ]
+            'primary' => ['type' => 'primary', 'columns' => ['id']],
+        ],
     ];
 
     public $records = [

@@ -21,7 +21,7 @@ class OAuthAuthenticateTest extends TestCase
         parent::setUp();
         $this->Collection = $this->getMockBuilder(ComponentRegistry::class)->getMock();
         $this->auth = new OAuthAuthenticate($this->Collection, [
-            'userModel' => 'Users'
+            'userModel' => 'Users',
         ]);
         TableRegistry::clear();
         $this->response = $this->getMockBuilder(Response::class)->getMock();

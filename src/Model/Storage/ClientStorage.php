@@ -22,7 +22,7 @@ class ClientStorage extends AbstractStorage implements ClientInterface
         $this->loadModel('OAuthServer.Clients');
         $query = $this->Clients->find()
             ->where([
-                $this->Clients->aliasField('id') => $clientId
+                $this->Clients->aliasField('id') => $clientId,
             ]);
 
         if ($clientSecret !== null) {
@@ -38,7 +38,7 @@ class ClientStorage extends AbstractStorage implements ClientInterface
             $client = new ClientEntity($this->server);
             $client->hydrate([
                 'id' => $result->id,
-                'name' => $result->name
+                'name' => $result->name,
             ]);
 
             return $client;
@@ -57,7 +57,7 @@ class ClientStorage extends AbstractStorage implements ClientInterface
         $result = $this->Sessions->find()
             ->contain(['Clients'])
             ->where([
-                'Sessions.id' => $session->getId()
+                'Sessions.id' => $session->getId(),
             ])
             ->first();
 

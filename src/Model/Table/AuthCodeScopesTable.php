@@ -15,10 +15,10 @@ class AuthCodeScopesTable extends Table
         $this->belongsTo('AuthCodes', [
                 'className' => 'OAuthServer.AuthCodes',
                 'foreignKey' => 'auth_code',
-                'propertyName' => 'code'
+                'propertyName' => 'code',
             ]);
         $this->belongsTo('Scopes', [
-                'className' => 'OAuthServer.Scopes'
+                'className' => 'OAuthServer.Scopes',
             ]);
         parent::initialize($config);
     }

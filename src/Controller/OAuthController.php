@@ -74,7 +74,7 @@ class OAuthController extends AppController
         $this->redirect([
             'action' => 'authorize',
             '_ext' => $this->request->param('_ext'),
-            '?' => $this->request->query
+            '?' => $this->request->query,
         ], 301);
     }
 
@@ -111,7 +111,7 @@ class OAuthController extends AppController
                 return $q->where([
                     'owner_model' => $ownerModel,
                     'owner_id' => $ownerId,
-                    'client_id' => $clientId
+                    'client_id' => $clientId,
                 ]);
             })
             ->count();
@@ -131,7 +131,7 @@ class OAuthController extends AppController
 
             $redirectUri = RedirectUri::make($this->authParams['redirect_uri'], [
                 'error' => $error->errorType,
-                'message' => $error->getMessage()
+                'message' => $error->getMessage(),
             ]);
 
             return $this->redirect($redirectUri);

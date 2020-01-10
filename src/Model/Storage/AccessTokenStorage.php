@@ -21,10 +21,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         $result = $this->AccessTokens->find()
             ->select([
                 'oauth_token',
-                'expires'
+                'expires',
             ])
             ->where([
-                'oauth_token' => $token
+                'oauth_token' => $token,
             ])
             ->first();
 
@@ -45,10 +45,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         $this->loadModel('OAuthServer.AccessTokenScopes');
         $result = $this->AccessTokenScopes->find()
             ->contain([
-                'Scopes'
+                'Scopes',
             ])
             ->where([
-                'oauth_token' => $token->getId()
+                'oauth_token' => $token->getId(),
             ])
             ->map(function (Entity $scope) {
                 return (new ScopeEntity($this->server))->hydrate([

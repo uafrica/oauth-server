@@ -16,11 +16,11 @@ class ScopesFixture extends TestFixture
         'id' => ['type' => 'string'],
         'description' => ['type' => 'string'],
         '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['id']]
-        ]
+            'primary' => ['type' => 'primary', 'columns' => ['id']],
+        ],
     ];
 
     public $records = [
-        ['id' => 'test', 'description' => '']
+        ['id' => 'test', 'description' => ''],
     ];
 }

@@ -16,7 +16,7 @@ class SessionScopesTable extends Table
                 'className' => 'OAuthServer.Sessions',
             ]);
         $this->belongsTo('Scopes', [
-                'className' => 'OAuthServer.Scopes'
+                'className' => 'OAuthServer.Scopes',
             ]);
         parent::initialize($config);
     }

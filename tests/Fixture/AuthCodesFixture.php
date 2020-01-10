@@ -13,7 +13,7 @@ class AuthCodesFixture extends TestFixture
         'redirect_uri' => ['type' => 'string'],
         'expires' => ['type' => 'integer'],
         '_constraints' => [
-            'primary' => ['type' => 'primary', 'columns' => ['code']]
-        ]
+            'primary' => ['type' => 'primary', 'columns' => ['code']],
+        ],
     ];
 }

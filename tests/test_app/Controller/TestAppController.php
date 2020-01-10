@@ -20,7 +20,7 @@ class TestAppController extends Controller
             'loginAction' => [
                 'controller' => 'Users',
                 'action' => 'login',
-            ]
+            ],
         ]);
     }
 }

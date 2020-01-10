@@ -4,24 +4,24 @@
         '/',
         [
             'controller' => 'OAuth',
-            'action' => 'oauth'
+            'action' => 'oauth',
         ]
     );
     $routes->connect(
         '/authorize',
         [
             'controller' => 'OAuth',
-            'action' => 'authorize'
+            'action' => 'authorize',
         ]
     );
     $routes->connect(
         '/access_token',
         [
             'controller' => 'OAuth',
-            'action' => 'accessToken'
+            'action' => 'accessToken',
         ],
         [
-            '_ext' => ['json']
+            '_ext' => ['json'],
         ]
     );
 });
