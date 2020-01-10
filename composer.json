@@ -37,5 +37,9 @@
             "name": "nojimage",
             "email": "nojimage@gmail.com"
         }
-    ]
+    ],
+    "scripts": {
+        "cs-check": "phpcs --colors -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config",
+        "cs-fix": "phpcbf -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config"
+    }
 }
