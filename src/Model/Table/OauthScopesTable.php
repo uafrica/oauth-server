@@ -32,6 +32,7 @@ class OauthScopesTable extends Table
         parent::initialize($config);
 
         $this->setTable('oauth_scopes');
+        $this->setPrimaryKey('id');
         $this->setEntityClass(Scope::class);
 
         $this->hasMany('AccessTokenScopes', [

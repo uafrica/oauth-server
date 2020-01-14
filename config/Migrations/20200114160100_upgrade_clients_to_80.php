@@ -14,6 +14,7 @@ class UpgradeClientsTo80 extends AbstractMigration
             'default' => null,
             'null' => true,
         ]);
+        $table->addTimestamps('created', 'modified');
 
         $table->update();
     }
@@ -27,6 +28,8 @@ class UpgradeClientsTo80 extends AbstractMigration
             'null' => false,
         ]);
         $table->removeColumn('grant_types');
+        $table->removeColumn('created');
+        $table->removeColumn('modified');
 
         $table->update();
     }
