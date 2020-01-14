@@ -1,12 +1,16 @@
 <?php
+/** @noinspection AutoloadingIssuesInspection */
 
-class OauthInitialMigration extends \Migrations\AbstractMigration
+use Migrations\AbstractMigration;
+
+class OauthInitialMigration extends AbstractMigration
 {
     /**
      * Change Method.
      *
      * More information on this method is available here:
      * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+     *
      * @return void
      */
     public function change()
@@ -143,21 +147,21 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'owner_model',
                 'string',
                 [
-                    'limit' => 200
+                    'limit' => 200,
                 ]
             )
             ->addColumn(
                 'owner_id',
                 'integer',
                 [
-                    'limit' => 11
+                    'limit' => 11,
                 ]
             )
             ->addColumn(
                 'client_id',
                 'string',
                 [
-                    'limit' => 20
+                    'limit' => 20,
                 ]
             )
             ->addColumn(
@@ -166,7 +170,7 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 [
                     'default' => null,
                     'limit' => 200,
-                    'null' => true
+                    'null' => true,
                 ]
             )
             ->create();
@@ -177,7 +181,7 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'string',
                 [
                     'default' => null,
-                    'limit' => 40
+                    'limit' => 40,
                 ]
             )
             ->addColumn(
@@ -185,7 +189,7 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'string',
                 [
                     'default' => null,
-                    'limit' => 200
+                    'limit' => 200,
                 ]
             )
             ->create();
@@ -225,14 +229,14 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'oauth_token',
                 'string',
                 [
-                    'length' => 40
+                    'length' => 40,
                 ]
             )
             ->addColumn(
                 'scope_id',
                 'string',
                 [
-                    'length' => 40
+                    'length' => 40,
                 ]
             )
             ->create();
@@ -242,14 +246,14 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'auth_code',
                 'string',
                 [
-                    'length' => 40
+                    'length' => 40,
                 ]
             )
             ->addColumn(
                 'scope_id',
                 'string',
                 [
-                    'length' => 40
+                    'length' => 40,
                 ]
             )
             ->create();
@@ -259,14 +263,14 @@ class OauthInitialMigration extends \Migrations\AbstractMigration
                 'session_id',
                 'integer',
                 [
-                    'length' => 11
+                    'length' => 11,
                 ]
             )
             ->addColumn(
                 'scope_id',
                 'string',
                 [
-                    'length' => 40
+                    'length' => 40,
                 ]
             )
             ->create();
