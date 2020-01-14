@@ -1,4 +1,6 @@
 <?php
+
+use Cake\Core\ClassLoader;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
@@ -16,14 +18,14 @@ $findRoot = function ($root) {
 $root = $findRoot(__FILE__);
 unset($findRoot);
 chdir($root);
-require_once 'vendor/cakephp/cakephp/src/basics.php';
-require_once 'vendor/autoload.php';
+require_once $root . '/vendor/cakephp/cakephp/src/basics.php';
+require_once $root . '/vendor/autoload.php';
 define('ROOT', $root . DS . 'tests' . DS . 'test_app' . DS);
 define('APP', ROOT);
 define('CONFIG', $root . DS . 'config' . DS);
 define('TMP', sys_get_temp_dir() . DS);
 
-$loader = new \Cake\Core\ClassLoader();
+$loader = new ClassLoader();
 $loader->register();
 $loader->addNamespace('TestApp', APP);
 
@@ -35,7 +37,7 @@ Configure::write('App', [
         'templates' => [ROOT . 'Template' . DS],
     ],
 ]);
-Cake\Cache\Cache::config([
+Cake\Cache\Cache::setConfig([
     '_cake_core_' => [
         'engine' => 'File',
         'prefix' => 'cake_core_',
@@ -56,16 +58,15 @@ if (!getenv('DB')) {
     putenv('DB=sqlite');
 }
 
-ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
+ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 
 Configure::write('OAuthServer.appController', 'TestApp\Controller\TestAppController');
 
-require_once $root . DS . 'config' . DS . 'bootstrap.php';
+// Disable deprecations for now when using 3.6
+if (version_compare(Configure::version(), '3.6.0', '>=')) {
+    error_reporting(E_ALL ^ E_USER_DEPRECATED);
+}
 
-Plugin::load('OAuth', [
-    'path' => dirname(dirname(__FILE__)) . DS,
-]);
-Plugin::load('OAuthServer', ['path' => $root]);
+Plugin::load('OAuthServer', ['path' => $root, 'bootstrap' => true, 'route' => true]);
 
-\Cake\Routing\DispatcherFactory::add('Routing');
-\Cake\Routing\DispatcherFactory::add('ControllerFactory');
+error_reporting(E_ALL);
