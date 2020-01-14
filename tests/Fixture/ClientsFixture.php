@@ -12,24 +12,29 @@ use Cake\TestSuite\Fixture\TestFixture;
 class ClientsFixture extends TestFixture
 {
     public $table = 'oauth_clients';
+
     public $fields = [
-        'id' => ['type' => 'string'],
-        'client_secret' => ['type' => 'string'],
-        'name' => ['type' => 'string'],
-        'redirect_uri' => ['type' => 'string'],
-        'parent_model' => ['type' => 'string'],
-        'parent_id' => ['type' => 'integer'],
+        'id' => ['type' => 'string', 'limit' => 20],
+        'client_secret' => ['type' => 'string', 'limit' => 40, 'null' => false],
+        'name' => ['type' => 'string', 'limit' => 200, 'null' => false],
+        'redirect_uri' => ['type' => 'text', 'null' => false],
+        'grant_types' => ['type' => 'text', 'null' => true],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
         ],
     ];
 
-    public $records = [
-        [
+    public function init()
+    {
+        $this->records[] = [
             'id' => 'TEST',
             'client_secret' => 'TestSecret',
             'name' => 'Test',
-            'redirect_uri' => 'http://www.example.com',
-        ],
-    ];
+            'redirect_uri' => json_encode(['http://www.example.com']),
+            'grant_types' => null,
+
+        ];
+
+        parent::init();
+    }
 }

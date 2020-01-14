@@ -3,44 +3,58 @@
 namespace OAuthServer\Model\Entity;
 
 use Cake\ORM\Entity;
-use Cake\ORM\TableRegistry;
-use Cake\Utility\Security;
-use Cake\Utility\Text;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
 
-class Client extends Entity
+/**
+ * implemented ClientEntityInterface
+ *
+ * @property string $id the client's identifier
+ * @property string|null $client_secret the client's secret key
+ * @property string $name the client's name
+ * @property string|string[] $redirect_uri Returns the registered redirect URI
+ * @property string[] $grant_types
+ */
+class Client extends Entity implements ClientEntityInterface
 {
+    protected $_accessible = [
+        'name' => true,
+        'redirect_uri' => true,
+        'grant_types' => true,
+    ];
+
+    protected $_hidden = [
+        'client_secret',
+    ];
+
     /**
-     * Create a new, pretty (as in moderately, not beautiful - that can't be guaranteed ;-) random client secret
-     *
-     * @return void
+     * @inheritDoc
      */
-    public function generateSecret()
+    public function getIdentifier()
     {
-        $this->client_secret = Security::hash(Text::uuid(), 'sha1', true);
-        $this->_original['client_secret'] = $this->client_secret;
+        return $this->id;
     }
 
     /**
-     * @return \Cake\Datasource\EntityInterface|mixed|null
+     * @inheritDoc
      */
-    protected function _getParent()
+    public function getName()
     {
-        if (empty($this->parent_model)) {
-            return null;
-        }
-        $parentTable = TableRegistry::get($this->parent_model);
-
-        return $parentTable->get($this->parent_id);
+        return $this->name;
     }
 
     /**
-     * @param string $name Existing name
-     * @return string
+     * @inheritDoc
      */
-    protected function _getName($name)
+    public function getRedirectUri()
     {
-        $parent = $this->parent;
+        return $this->redirect_uri;
+    }
 
-        return $parent ? $parent->name : $name;
+    /**
+     * @inheritDoc
+     */
+    public function isConfidential()
+    {
+        return !empty($this->client_secret);
     }
 }
