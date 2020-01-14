@@ -11,7 +11,7 @@ class SessionsTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_sessions');
+        $this->setTable('oauth_sessions');
         $this->hasMany('SessionScopes', [
                 'className' => 'OAuthServer.SessionScopes',
                 'foreignKey' => 'session_id',

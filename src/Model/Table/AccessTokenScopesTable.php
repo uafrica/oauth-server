@@ -12,7 +12,7 @@ class AccessTokenScopesTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_access_token_scopes');
+        $this->setTable('oauth_access_token_scopes');
         $this->belongsTo('AccessTokens', [
             'className' => 'OAuthServer.AccessTokens',
             'foreignKey' => 'oauth_token',

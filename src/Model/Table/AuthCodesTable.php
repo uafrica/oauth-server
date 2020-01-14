@@ -18,8 +18,8 @@ class AuthCodesTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_auth_codes');
-        $this->primaryKey('code');
+        $this->setTable('oauth_auth_codes');
+        $this->setPrimaryKey('code');
 
         $this->belongsTo(
             'Sessions',

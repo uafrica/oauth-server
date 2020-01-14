@@ -11,7 +11,7 @@ class AuthCodeScopesTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_auth_code_scopes');
+        $this->setTable('oauth_auth_code_scopes');
         $this->belongsTo('AuthCodes', [
                 'className' => 'OAuthServer.AuthCodes',
                 'foreignKey' => 'auth_code',

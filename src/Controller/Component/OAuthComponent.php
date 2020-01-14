@@ -58,7 +58,7 @@ class OAuthComponent extends Component
      */
     protected function _getAuthorizationServer()
     {
-        $serverConfig = $this->config('authorizationServer');
+        $serverConfig = $this->getConfig('authorizationServer');
         $serverClassName = App::className($serverConfig['className']);
 
         return new $serverClassName();
@@ -78,7 +78,7 @@ class OAuthComponent extends Component
         $server->setAuthCodeStorage($this->_getStorage('authCode'));
         $server->setRefreshTokenStorage($this->_getStorage('refreshToken'));
 
-        $supportedGrants = isset($config['supportedGrants']) ? $config['supportedGrants'] : $this->config('supportedGrants');
+        $supportedGrants = isset($config['supportedGrants']) ? $config['supportedGrants'] : $this->getConfig('supportedGrants');
         $supportedGrants = $this->_registry->normalizeArray($supportedGrants);
 
         foreach ($supportedGrants as $properties) {
@@ -117,8 +117,8 @@ class OAuthComponent extends Component
             $server->addGrantType($objGrant);
         }
 
-        if ($this->config('accessTokenTTL')) {
-            $server->setAccessTokenTTL($this->config('accessTokenTTL'));
+        if ($this->getConfig('accessTokenTTL')) {
+            $server->setAccessTokenTTL($this->getConfig('accessTokenTTL'));
         }
 
         $this->Server = $server;

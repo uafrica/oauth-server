@@ -18,8 +18,8 @@ class RefreshTokensTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_refresh_tokens');
-        $this->primaryKey('refresh_token');
+        $this->setTable('oauth_refresh_tokens');
+        $this->setPrimaryKey('refresh_token');
         $this->belongsTo('AccessTokens', [
             'className' => 'OAuthServer.AccessTokens',
             'foreignKey' => 'oauth_token',

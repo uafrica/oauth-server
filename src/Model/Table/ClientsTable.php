@@ -20,9 +20,9 @@ class ClientsTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_clients');
-        $this->primaryKey('id');
-        $this->displayField('name');
+        $this->setTable('oauth_clients');
+        $this->setPrimaryKey('id');
+        $this->setDisplayField('name');
         $this->hasMany('Sessions', [
             'className' => 'OAuthServer.Sessions',
             'foreignKey' => 'client_id',

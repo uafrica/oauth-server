@@ -11,7 +11,7 @@ class ScopesTable extends Table
      */
     public function initialize(array $config)
     {
-        $this->table('oauth_scopes');
+        $this->setTable('oauth_scopes');
         $this->hasMany('AccessTokenScopes', [
             'className' => 'OAuthServer.AccessTokenScopes',
         ]);

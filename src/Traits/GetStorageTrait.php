@@ -33,7 +33,7 @@ trait GetStorageTrait
      */
     protected function _getStorage($name)
     {
-        $config = $this->config('storages.' . $name);
+        $config = $this->getConfig('storages.' . $name);
 
         if (empty($config)) {
             throw new Exception(sprintf('Storage class "%s" has no configuration', $name));
