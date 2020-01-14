@@ -16,6 +16,8 @@ class ScopesFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'string'],
         'description' => ['type' => 'string'],
+        'created' => ['type' => 'timestamp'],
+        'modified' => ['type' => 'timestamp'],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
         ],

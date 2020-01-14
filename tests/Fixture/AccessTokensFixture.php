@@ -20,6 +20,8 @@ class AccessTokensFixture extends TestFixture
         'client_id' => ['type' => 'string', 'null' => false, 'limit' => 20],
         'user_id' => ['type' => 'string', 'null' => false, 'limit' => 36],
         'revoked' => ['type' => 'boolean', 'default' => false, 'null' => false],
+        'created' => ['type' => 'timestamp'],
+        'modified' => ['type' => 'timestamp'],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['oauth_token']],
         ],
