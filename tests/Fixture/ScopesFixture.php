@@ -12,6 +12,7 @@ use Cake\TestSuite\Fixture\TestFixture;
 class ScopesFixture extends TestFixture
 {
     public $table = 'oauth_scopes';
+
     public $fields = [
         'id' => ['type' => 'string'],
         'description' => ['type' => 'string'],
