@@ -1,14 +1,14 @@
 <?php
 
-namespace OAuthServer\Test\TestCase\Model\Bridge\Repository;
+namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
 use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
-use OAuthServer\Model\Bridge\Repository\AccessTokenRepository;
-use OAuthServer\Model\Bridge\Repository\ClientRepository;
-use OAuthServer\Model\Bridge\Repository\ScopeRepository;
+use OAuthServer\Bridge\Repository\AccessTokenRepository;
+use OAuthServer\Bridge\Repository\ClientRepository;
+use OAuthServer\Bridge\Repository\ScopeRepository;
 use OAuthServer\Model\Entity\AccessToken;
 use OAuthServer\Model\Entity\Scope;
 use OAuthServer\Model\Table\AccessTokensTable;

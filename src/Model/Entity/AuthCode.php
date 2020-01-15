@@ -4,9 +4,9 @@ namespace OAuthServer\Model\Entity;
 
 use Cake\ORM\Entity;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
-use OAuthServer\Model\Bridge\Entity\ExpiryDateTimeTrait;
-use OAuthServer\Model\Bridge\Entity\TokenEntityTrait;
-use OAuthServer\Model\Bridge\Entity\User;
+use OAuthServer\Bridge\Entity\ExpiryDateTimeTrait;
+use OAuthServer\Bridge\Entity\TokenEntityTrait;
+use OAuthServer\Bridge\Entity\User;
 
 /**
  * Class AuthCode

@@ -1,6 +1,6 @@
 <?php
 
-namespace OAuthServer\Model\Bridge\Entity;
+namespace OAuthServer\Bridge\Entity;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;

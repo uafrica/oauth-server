@@ -1,6 +1,6 @@
 <?php
 
-namespace OAuthServer\Model\Bridge\Repository;
+namespace OAuthServer\Bridge\Repository;
 
 use Cake\Datasource\ModelAwareTrait;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace OAuthServer\Model\Bridge\Entity;
+namespace OAuthServer\Bridge\Entity;
 
 use Cake\I18n\FrozenTime;
 use DateTimeImmutable;

@@ -5,7 +5,7 @@ namespace OAuthServer\Model\Entity;
 use Cake\ORM\Entity;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
-use OAuthServer\Model\Bridge\Entity\ExpiryDateTimeTrait;
+use OAuthServer\Bridge\Entity\ExpiryDateTimeTrait;
 
 /**
  * implemented RefreshTokenEntityInterface

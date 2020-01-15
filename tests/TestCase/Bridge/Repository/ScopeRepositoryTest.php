@@ -1,10 +1,10 @@
 <?php
 
-namespace OAuthServer\Test\TestCase\Model\Bridge\Repository;
+namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
 use Cake\TestSuite\TestCase;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
-use OAuthServer\Model\Bridge\Repository\ScopeRepository;
+use OAuthServer\Bridge\Repository\ScopeRepository;
 use OAuthServer\Model\Entity\Client;
 use OAuthServer\Model\Entity\Scope;
 

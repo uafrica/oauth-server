@@ -1,9 +1,9 @@
 <?php
 
-namespace OAuthServer\Test\TestCase\Model\Bridge\Repository;
+namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
 use Cake\TestSuite\TestCase;
-use OAuthServer\Model\Bridge\Repository\ClientRepository;
+use OAuthServer\Bridge\Repository\ClientRepository;
 
 class ClientRepositoryTest extends TestCase
 {

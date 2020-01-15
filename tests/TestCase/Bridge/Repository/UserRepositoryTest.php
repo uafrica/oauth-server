@@ -1,11 +1,11 @@
 <?php
 
-namespace OAuthServer\Test\TestCase\Model\Bridge\Repository;
+namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
 use Cake\ORM\Entity;
-use OAuthServer\Model\Bridge\Entity\User;
-use OAuthServer\Model\Bridge\Repository\UserRepository;
-use OAuthServer\Model\Bridge\UserFinderByUserCredentialsInterface;
+use OAuthServer\Bridge\Entity\User;
+use OAuthServer\Bridge\Repository\UserRepository;
+use OAuthServer\Bridge\UserFinderByUserCredentialsInterface;
 use OAuthServer\Model\Entity\Client;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

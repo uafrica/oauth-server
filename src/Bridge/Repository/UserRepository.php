@@ -1,12 +1,12 @@
 <?php
 
-namespace OAuthServer\Model\Bridge\Repository;
+namespace OAuthServer\Bridge\Repository;
 
 use Cake\Datasource\RepositoryInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
-use OAuthServer\Model\Bridge\Entity\User;
-use OAuthServer\Model\Bridge\UserFinderByUserCredentialsInterface;
+use OAuthServer\Bridge\Entity\User;
+use OAuthServer\Bridge\UserFinderByUserCredentialsInterface;
 
 /**
  * implemented UserRepositoryInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace OAuthServer\Model\Bridge;
+namespace OAuthServer\Bridge;
 
 use Cake\Datasource\EntityInterface;
 
