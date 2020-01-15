@@ -2,15 +2,13 @@
 
 namespace OAuthServer\Test\TestCase\Controller\Component;
 
-use Cake\Controller\Component\AuthComponent;
 use Cake\Controller\ComponentRegistry;
+use Cake\Controller\Component\AuthComponent;
 use Cake\Controller\Controller;
-use Cake\Event\EventManager;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\TestSuite\TestCase;
 use League\OAuth2\Server\AuthorizationServer;
-use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use OAuthServer\Controller\Component\OAuthComponent;
 
 class OAuthComponentTest extends TestCase

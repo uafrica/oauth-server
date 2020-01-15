@@ -2,25 +2,45 @@
 
 namespace OAuthServer\Test\TestCase\Controller;
 
-use Cake\Event\EventManager;
+use Cake\Core\Plugin;
+use Cake\Http\ServerRequest;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\RouteBuilder;
 use Cake\Routing\Router;
 use Cake\TestSuite\IntegrationTestCase;
 use OAuthServer\Controller\OAuthController;
+use OAuthServer\Model\Table\AccessTokensTable;
+use OAuthServer\Model\Table\AuthCodesTable;
+use OAuthServer\Model\Table\RefreshTokensTable;
 use TestApp\Controller\TestAppController;
 
 class OAuthControllerTest extends IntegrationTestCase
 {
     public $fixtures = [
-        'plugin.o_auth_server.clients',
-        'plugin.o_auth_server.scopes',
-        'plugin.o_auth_server.access_tokens',
-        'plugin.o_auth_server.sessions',
-        'plugin.o_auth_server.session_scopes',
-        'plugin.o_auth_server.auth_codes',
-        'plugin.o_auth_server.auth_code_scopes',
+        'plugin.OAuthServer.Clients',
+        'plugin.OAuthServer.Scopes',
+        'plugin.OAuthServer.AccessTokens',
+        'plugin.OAuthServer.AccessTokenScopes',
+        'plugin.OAuthServer.AuthCodes',
+        'plugin.OAuthServer.AuthCodeScopes',
+        'plugin.OAuthServer.RefreshTokens',
+        'plugin.OAuthServer.Users',
     ];
+
+    /**
+     * @var AccessTokensTable
+     */
+    private $AccessTokens;
+
+    /**
+     * @var RefreshTokensTable
+     */
+    private $RefreshTokens;
+
+    /**
+     * @var AuthCodesTable
+     */
+    private $AuthCodes;
 
     public function setUp()
     {
@@ -30,9 +50,21 @@ class OAuthControllerTest extends IntegrationTestCase
 
         parent::setUp();
 
-        Router::plugin('OAuthServer', function (RouteBuilder $routes) {
-            $routes->connect('/login', ['controller' => 'Users', 'action' => 'login']);
+        Router::connect('/');
+        Router::scope('/', static function (RouteBuilder $route) {
+            $route->fallbacks();
         });
+        include Plugin::configPath('OAuthServer') . 'routes.php';
+
+        $this->AccessTokens = TableRegistry::getTableLocator()->get('OAuthServer.AccessTokens');
+        $this->RefreshTokens = TableRegistry::getTableLocator()->get('OAuthServer.RefreshTokens');
+        $this->AuthCodes = TableRegistry::getTableLocator()->get('OAuthServer.AuthCodes');
+    }
+
+    public function tearDown()
+    {
+        unset($this->AccessTokens, $this->RefreshTokens, $this->AuthCodes);
+        parent::tearDown();
     }
 
     public function testInstanceOfClassFromConfig()
@@ -41,60 +73,176 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertInstanceOf(TestAppController::class, $controller);
     }
 
-    public function testOauthRedirectsToAuthorize()
+    public function testAssertRoute()
     {
-        $this->get($this->url("/oauth") . "?client_id=CID&anything=at_all");
-        $this->assertRedirect(['controller' => 'OAuth', 'action' => 'authorize', '?' => ['client_id' => 'CID', 'anything' => 'at_all']]);
+        $parsed = Router::parseRequest(new ServerRequest('/oauth'));
+        $this->assertEquals([
+            'controller' => 'OAuth',
+            'action' => 'oauth',
+            'plugin' => 'OAuthServer',
+            'pass' => [],
+            '_matchedRoute' => '/oauth',
+        ], $parsed);
+
+        $parsed = Router::parseRequest(new ServerRequest('/oauth/authorize'));
+        $this->assertEquals([
+            'controller' => 'OAuth',
+            'action' => 'authorize',
+            'plugin' => 'OAuthServer',
+            'pass' => [],
+            '_matchedRoute' => '/oauth/authorize',
+        ], $parsed);
+
+        $parsed = Router::parseRequest(new ServerRequest('/oauth/access_token'));
+        $this->assertEquals([
+            'controller' => 'OAuth',
+            'action' => 'accessToken',
+            'plugin' => 'OAuthServer',
+            'pass' => [],
+            '_matchedRoute' => '/oauth/access_token',
+        ], $parsed);
     }
 
-    public function testAuthorizeInvalidParams()
+    public function testOauthRedirectsToAuthorize()
     {
-        $_GET = ['client_id' => 'INVALID', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
-        $this->get($this->url('/oauth/authorize') . '?' . http_build_query($_GET));
-        $this->assertResponseError();
+        $this->get($this->url('/oauth') . '?client_id=CID&anything=at_all');
+        $this->assertRedirect(['controller' => 'OAuth', 'action' => 'authorize', '?' => ['client_id' => 'CID', 'anything' => 'at_all']]);
+        $this->assertResponseCode(301);
     }
 
     public function testAuthorizeLoginRedirect()
     {
-        $_GET = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
-        $authorizeUrl = $this->url('/oauth/authorize') . '?' . http_build_query($_GET);
+        $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $authorizeUrl = $this->url('/oauth/authorize') . '?' . http_build_query($query);
 
         $this->get($authorizeUrl);
-        $this->assertRedirect(['controller' => 'Users', 'action' => 'login', '?' => ['redirect' => $authorizeUrl]]);
+
+        $this->assertRedirect(['plugin' => false, 'controller' => 'Users', 'action' => 'login', '?' => ['redirect' => $authorizeUrl]]);
     }
 
-    public function testStoreCurrentUserAndDefaultAuth()
+    public function testAuthorizeInvalidParams()
     {
-        $this->session(['Auth.User.id' => 5]);
+        $this->session(['Auth.User.id' => 'user1']);
+        $query = ['client_id' => 'INVALID', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $this->get($this->url('/oauth/authorize') . '?' . http_build_query($query));
 
-        $_GET = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
-        $this->post('/oauth/authorize' . '?' . http_build_query($_GET), ['authorization' => 'Approve']);
+        $this->assertResponseError('Client authentication failed');
+    }
+
+    public function testGetAuthorize()
+    {
+        $this->session(['Auth.User.id' => 'user1']);
+        $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $this->get($this->url('/oauth/authorize') . '?' . http_build_query($query));
+
+        $this->assertResponseOk();
+
+        $this->assertResponseContains('Test would like to access:');
+    }
+
+    public function testAuthorizationCodeDeny()
+    {
+        $this->session(['Auth.User.id' => 'user1']);
+
+        $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $this->post($this->url('/oauth/authorize') . '?' . http_build_query($query), ['authorization' => 'Deny']);
 
         $this->assertRedirect();
 
-        $sessions = TableRegistry::get('OAuthServer.Sessions');
-        $this->assertTrue($sessions->exists(['owner_id' => 5, 'owner_model' => 'Users']), "Session in database was not correct");
+        $redirectUrl = $this->_response->getHeaderLine('Location');
+        $this->assertStringStartsWith('http://www.example.comerror=access_denied&message=', $redirectUrl);
     }
 
-    public function testOverrideOwnerModelAndOwnerId()
+    public function testAuthorizationCode()
     {
-        $this->session(['Auth.User.id' => 5]);
+        $this->session(['Auth.User.id' => 'user1']);
 
-        EventManager::instance()->on('OAuthServer.beforeAuthorize', function () {
-            return [
-                'ownerModel' => 'AnotherModel',
-                'ownerId' => 15,
-            ];
-        });
+        $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $this->post($this->url('/oauth/authorize') . '?' . http_build_query($query), ['authorization' => 'Approve']);
 
-        $_GET = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
-        $this->post('/oauth/authorize' . '?' . http_build_query($_GET), ['authorization' => 'Approve']);
+        $this->assertRedirect();
 
-        $this->assertEquals('AnotherModel', $this->viewVariable('ownerModel'));
-        $this->assertEquals(15, $this->viewVariable('ownerId'));
+        $redirectUrl = $this->_response->getHeaderLine('Location');
+        $this->assertStringStartsWith('http://www.example.com?code=', $redirectUrl);
+        parse_str(parse_url($redirectUrl, PHP_URL_QUERY), $responseQuery);
 
-        $sessions = TableRegistry::get('OAuthServer.Sessions');
-        $this->assertTrue($sessions->exists(['owner_id' => 15, 'owner_model' => 'AnotherModel']), "Session in database was not correct");
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'authorization_code',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'redirect_uri' => 'http://www.example.com',
+            'code' => $responseQuery['code'],
+        ]);
+        $this->assertResponseOk();
+
+        $response = $this->grabResponseJson();
+        $this->assertSame('Bearer', $response['token_type']);
+        $this->assertSame(3600, $response['expires_in']);
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
+    }
+
+    public function testPasswordAuthorization()
+    {
+        $this->session(['Auth.User.id' => 'user1']);
+
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'password',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+            'username' => 'user1@example.com',
+            'password' => '123456',
+        ]);
+        $this->assertResponseOk();
+
+        $response = $this->grabResponseJson();
+        $this->assertSame('Bearer', $response['token_type']);
+        $this->assertSame(3600, $response['expires_in']);
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
+    }
+
+    public function testRefreshToken()
+    {
+        $this->session(['Auth.User.id' => 'user1']);
+
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'password',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+            'username' => 'user1@example.com',
+            'password' => '123456',
+        ]);
+
+        $this->assertResponseOk();
+        $response = $this->grabResponseJson();
+        $this->assertSame('Bearer', $response['token_type']);
+        $this->assertSame(3600, $response['expires_in']);
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
+
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'refresh_token',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+            'refresh_token' => $response['refresh_token'],
+        ]);
+        $this->assertResponseOk();
+        $refreshed = $this->grabResponseJson();
+        $this->assertSame('Bearer', $refreshed['token_type']);
+        $this->assertSame(3600, $refreshed['expires_in']);
+        $this->assertArrayHasKey('access_token', $refreshed);
+        $this->assertArrayHasKey('refresh_token', $refreshed);
+        $this->assertNotEquals($response['access_token'], $refreshed['access_token']);
+        $this->assertNotEquals($response['refresh_token'], $refreshed['refresh_token']);
+    }
+
+    private function grabResponseJson()
+    {
+        return json_decode((string)$this->_response->getBody(), true);
     }
 
     private function url($path, $ext = null)

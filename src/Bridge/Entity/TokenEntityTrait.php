@@ -9,7 +9,7 @@ trait TokenEntityTrait
 {
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getUserIdentifier()
     {
@@ -17,7 +17,7 @@ trait TokenEntityTrait
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function setUserIdentifier($identifier)
     {
@@ -25,7 +25,7 @@ trait TokenEntityTrait
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getClient()
     {
@@ -33,7 +33,7 @@ trait TokenEntityTrait
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function setClient(ClientEntityInterface $client)
     {
@@ -42,7 +42,7 @@ trait TokenEntityTrait
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getScopes()
     {
@@ -50,7 +50,7 @@ trait TokenEntityTrait
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function addScope(ScopeEntityInterface $scope)
     {
