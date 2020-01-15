@@ -42,9 +42,21 @@ class AuthorizationServerFactory
     private $encryptionKey;
 
     /**
+     * AuthorizationServerFactory constructor.
+     *
+     * @param string $privateKeyPath the PrivateKey's path
+     * @param Key|string $encryptionKey the Encryption key string or Key object
+     */
+    public function __construct(string $privateKeyPath, $encryptionKey)
+    {
+        $this->setPrivateKeyPath($privateKeyPath);
+        $this->setEncryptionKey($encryptionKey);
+    }
+
+    /**
      * @return AuthorizationServer
      */
-    public function create()
+    public function create(): AuthorizationServer
     {
         return new AuthorizationServer(
             $this->getClientRepository(),
@@ -60,7 +72,7 @@ class AuthorizationServerFactory
      */
     public function getClientRepository(): ClientRepositoryInterface
     {
-        if ($this->clientRepository) {
+        if (!$this->clientRepository) {
             $this->clientRepository = new ClientRepository();
         }
 
@@ -69,6 +81,7 @@ class AuthorizationServerFactory
 
     /**
      * @param ClientRepositoryInterface $clientRepository the Repository
+     * @return void
      */
     public function setClientRepository(ClientRepositoryInterface $clientRepository): void
     {
@@ -89,6 +102,7 @@ class AuthorizationServerFactory
 
     /**
      * @param AccessTokenRepositoryInterface $accessTokenRepository the Repository
+     * @return void
      */
     public function setAccessTokenRepository(AccessTokenRepositoryInterface $accessTokenRepository): void
     {
@@ -109,6 +123,7 @@ class AuthorizationServerFactory
 
     /**
      * @param ScopeRepositoryInterface $scopeRepository the Repository
+     * @return void
      */
     public function setScopeRepository(ScopeRepositoryInterface $scopeRepository): void
     {
@@ -125,6 +140,7 @@ class AuthorizationServerFactory
 
     /**
      * @param string $privateKeyPath the PrivateKey's path
+     * @return void
      */
     public function setPrivateKeyPath(string $privateKeyPath): void
     {
@@ -141,9 +157,14 @@ class AuthorizationServerFactory
 
     /**
      * @param Key|string $encryptionKey the Encryption key string or Key object
+     * @return void
      */
     public function setEncryptionKey($encryptionKey): void
     {
+        if (is_string($encryptionKey)) {
+            $encryptionKey = Key::loadFromAsciiSafeString($encryptionKey);
+        }
+
         $this->encryptionKey = $encryptionKey;
     }
 }
