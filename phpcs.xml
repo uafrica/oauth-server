@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="CakePHP Plugin">
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>config/Migrations/*</exclude-pattern>
+    <exclude-pattern>config/Seeds/*</exclude-pattern>
+    <exclude-pattern>Template/Bake/*</exclude-pattern>
+    <exclude-pattern>webroot/*</exclude-pattern>
+
+    <rule ref="./vendor/cakephp/cakephp-codesniffer/CakePHP"/>
+</ruleset>

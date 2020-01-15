@@ -37,6 +37,9 @@ class OauthClientsTable extends Table
         $this->setDisplayField('name');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function _initializeSchema(TableSchema $schema): TableSchema
     {
         $schema->setColumnType('redirect_uri', 'json');

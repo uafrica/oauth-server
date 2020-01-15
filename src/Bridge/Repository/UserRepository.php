@@ -21,7 +21,7 @@ class UserRepository implements UserRepositoryInterface
     /**
      * UserRepository constructor.
      *
-     * @param UserFinderByUserCredentialsInterface $finder
+     * @param UserFinderByUserCredentialsInterface $finder user finder
      */
     public function __construct(UserFinderByUserCredentialsInterface $finder)
     {

@@ -14,6 +14,11 @@ class User implements UserEntityInterface
      */
     private $id;
 
+    /**
+     * User constructor.
+     *
+     * @param string|int $identifier the user identifier
+     */
     public function __construct($identifier)
     {
         $this->id = $identifier;
