@@ -4,6 +4,7 @@ namespace OAuthServer\Auth;
 
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\ComponentRegistry;
+use Cake\Core\Configure;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Network\Exception\BadRequestException;
@@ -34,7 +35,7 @@ class OAuthAuthenticate extends BaseAuthenticate
      */
     protected $_defaultConfig = [
         'continue' => false,
-        'publicKey' => CONFIG . 'oauth.pub',
+        'publicKey' => null,
         'fields' => [
             'username' => 'id',
         ],
@@ -52,7 +53,7 @@ class OAuthAuthenticate extends BaseAuthenticate
     {
         parent::__construct($registry, $config);
 
-        if ($this->getConfig('server')) {
+        if ($this->getConfig('server') && $this->getConfig('server') instanceof ResourceServer) {
             $this->Server = $this->getConfig('server');
 
             return;
@@ -65,7 +66,9 @@ class OAuthAuthenticate extends BaseAuthenticate
     protected function getServer(): ResourceServer
     {
         if (!$this->Server) {
-            $serverFactory = new ResourceServerFactory($this->getConfig('publicKey'));
+            $serverFactory = new ResourceServerFactory(
+                $this->getConfig('publicKey', Configure::read('OAuthServer.publicKey'))
+            );
 
             $this->Server = $serverFactory->create();
         }

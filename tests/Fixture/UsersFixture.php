@@ -7,6 +7,7 @@
 
 namespace OAuthServer\Test\Fixture;
 
+use Cake\Auth\DefaultPasswordHasher;
 use Cake\I18n\FrozenTime;
 use Cake\TestSuite\Fixture\TestFixture;
 
@@ -17,6 +18,8 @@ class UsersFixture extends TestFixture
     public $fields = [
         'id' => ['type' => 'string', 'null' => false, 'limit' => 36],
         'name' => ['type' => 'string'],
+        'email' => ['type' => 'string'],
+        'password' => ['type' => 'string'],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
         ],
@@ -24,13 +27,19 @@ class UsersFixture extends TestFixture
 
     public function init()
     {
+        $hasher = new DefaultPasswordHasher();
+
         $this->records[] = [
             'id' => 'user1',
             'name' => 'Alice',
+            'email' => 'user1@example.com',
+            'password' => $hasher->hash('123456'),
         ];
         $this->records[] = [
             'id' => 'user2',
             'name' => 'Bob',
+            'email' => 'user2@example.com',
+            'password' => $hasher->hash('654321'),
         ];
 
         parent::init();
