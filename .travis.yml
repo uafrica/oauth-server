@@ -35,6 +35,7 @@ before_script:
   - if [ $DB = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi
   - phpenv rehash
   - set +H
+  - chmod 0600 tests/Fixture/*.pem
 
 script:
   - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit; fi"
