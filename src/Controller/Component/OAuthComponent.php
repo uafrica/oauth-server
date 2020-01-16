@@ -4,7 +4,6 @@ namespace OAuthServer\Controller\Component;
 
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\Component;
-use Cake\Core\Configure;
 use Cake\Datasource\EntityInterface;
 use Cake\Network\Exception\NotImplementedException;
 use Cake\ORM\Entity;
@@ -57,8 +56,8 @@ class OAuthComponent extends Component implements UserFinderByUserCredentialsInt
     {
         if (!$this->Server) {
             $factory = new AuthorizationServerFactory(
-                $this->getConfig('privateKey', Configure::read('OAuthServer.privateKey')),
-                $this->getConfig('encryptionKey', Configure::read('OAuthServer.encryptionKey'))
+                $this->getConfig('privateKey'),
+                $this->getConfig('encryptionKey')
             );
 
             $this->Server = $factory->create();

@@ -2,6 +2,7 @@
 
 namespace OAuthServer\Test\TestCase\Controller;
 
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Http\ServerRequest;
 use Cake\Routing\RouteBuilder;
@@ -254,6 +255,21 @@ class OAuthControllerTest extends IntegrationTestCase
         ]);
 
         $this->assertResponseError('Client authentication failed');
+    }
+
+    public function testSetComponentConfigurationFromConfigure()
+    {
+        Configure::write('OAuthServer.accessTokenTTL', 'PT2H');
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+        ]);
+        $this->assertResponseOk();
+
+        $response = $this->grabResponseJson();
+        $this->assertSame(7200, $response['expires_in'], 'expires is 2 hours');
     }
 
     private function grabResponseJson()
