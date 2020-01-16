@@ -2,6 +2,7 @@
 
 namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
+use Cake\Core\Configure;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
@@ -110,6 +111,18 @@ class RefreshTokenRepositoryTest extends TestCase
 
         $this->repository->revokeRefreshToken('exist_refresh_token_1');
 
+        $this->assertTrue($this->repository->isRefreshTokenRevoked('exist_refresh_token_1'));
+    }
+
+    public function testDeleteRecordOnRevoke()
+    {
+        $this->assertNotTrue(Configure::read('OAuthServer.deleteRefreshTokenOnRevoke'));
+        $this->repository->setDeleteRecordOnRevoke(true);
+        $this->assertTrue(Configure::read('OAuthServer.deleteRefreshTokenOnRevoke'));
+
+        $this->repository->revokeRefreshToken('exist_refresh_token_1');
+
+        $this->assertFalse($this->RefreshTokens->exists(['oauth_token' => 'exist_refresh_token_1']));
         $this->assertTrue($this->repository->isRefreshTokenRevoked('exist_refresh_token_1'));
     }
 }

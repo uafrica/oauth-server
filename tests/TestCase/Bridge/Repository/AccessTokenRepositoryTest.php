@@ -2,6 +2,7 @@
 
 namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
+use Cake\Core\Configure;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
@@ -132,6 +133,18 @@ class AccessTokenRepositoryTest extends TestCase
 
         $this->repository->revokeAccessToken('exist_token_1');
 
+        $this->assertTrue($this->repository->isAccessTokenRevoked('exist_token_1'));
+    }
+
+    public function testDeleteRecordOnRevoke()
+    {
+        $this->assertNotTrue(Configure::read('OAuthServer.deleteAccessTokenOnRevoke'));
+        $this->repository->setDeleteRecordOnRevoke(true);
+        $this->assertTrue(Configure::read('OAuthServer.deleteAccessTokenOnRevoke'));
+
+        $this->repository->revokeAccessToken('exist_token_1');
+
+        $this->assertFalse($this->AccessTokens->exists(['oauth_token' => 'exist_token_1']));
         $this->assertTrue($this->repository->isAccessTokenRevoked('exist_token_1'));
     }
 }

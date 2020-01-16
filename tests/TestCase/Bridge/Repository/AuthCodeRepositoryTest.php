@@ -2,6 +2,7 @@
 
 namespace OAuthServer\Test\TestCase\Bridge\Repository;
 
+use Cake\Core\Configure;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
@@ -121,6 +122,18 @@ class AuthCodeRepositoryTest extends TestCase
 
         $this->repository->revokeAuthCode('exist_code_1');
 
+        $this->assertTrue($this->repository->isAuthCodeRevoked('exist_code_1'));
+    }
+
+    public function testDeleteRecordOnRevoke()
+    {
+        $this->assertNotTrue(Configure::read('OAuthServer.deleteAuthCodeOnRevoke'));
+        $this->repository->setDeleteRecordOnRevoke(true);
+        $this->assertTrue(Configure::read('OAuthServer.deleteAuthCodeOnRevoke'));
+
+        $this->repository->revokeAuthCode('exist_code_1');
+
+        $this->assertFalse($this->AuthCodes->exists(['code' => 'exist_code_1']));
         $this->assertTrue($this->repository->isAuthCodeRevoked('exist_code_1'));
     }
 }

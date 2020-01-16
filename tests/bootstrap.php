@@ -67,6 +67,9 @@ Configure::write('OAuthServer', [
     'privateKey' => $root . '/tests/Fixture/test.pem',
     'publicKey' => $root . '/tests/Fixture/test-pub.pem',
     'encryptionKey' => 'def00000dc02308bae1781f846e667ca557628277485ba7c5ce897b74deb7b26ba1429a5b08d775708626a7f0664688d46f102066aefbf47e0000798043d11e06574ea83',
+    'deleteAuthCodeOnRevoke' => false,
+    'deleteAccessTokenOnRevoke' => false,
+    'deleteRefreshTokenOnRevoke' => false,
 ]);
 
 // Disable deprecations for now when using 3.6

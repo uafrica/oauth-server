@@ -3,6 +3,7 @@
 namespace OAuthServer\Bridge\Repository;
 
 use Cake\Datasource\ModelAwareTrait;
+use Cake\ORM\Table;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
@@ -12,6 +13,7 @@ use OAuthServer\Model\Table\AuthCodesTable;
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
     use ModelAwareTrait;
+    use RevokeTokenRepositoryTrait;
 
     /**
      * @var AuthCodesTable
@@ -71,10 +73,7 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
             return;
         }
 
-        $token = $this->table->get($codeId);
-        $token->revoked = true;
-
-        $this->table->save($token);
+        $this->revokeToken($codeId);
     }
 
     /**
@@ -82,11 +81,22 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
      */
     public function isAuthCodeRevoked($codeId): bool
     {
-        $conditions = [
-            $this->table->aliasField($this->table->getPrimaryKey()) => $codeId,
-            $this->table->aliasField('revoked') => false,
-        ];
+        return $this->isTokenRevoked($codeId);
+    }
 
-        return !$this->table->exists($conditions);
+    /**
+     * @return string
+     */
+    protected function getDeleteRecordOnRevokeKeyName(): string
+    {
+        return 'OAuthServer.deleteAuthCodeOnRevoke';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getTable(): Table
+    {
+        return $this->table;
     }
 }

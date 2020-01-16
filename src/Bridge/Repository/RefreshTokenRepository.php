@@ -3,6 +3,7 @@
 namespace OAuthServer\Bridge\Repository;
 
 use Cake\Datasource\ModelAwareTrait;
+use Cake\ORM\Table;
 use League\OAuth2\Server\Entities\RefreshTokenEntityInterface;
 use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
 use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
@@ -15,6 +16,7 @@ use OAuthServer\Model\Table\RefreshTokensTable;
 class RefreshTokenRepository implements RefreshTokenRepositoryInterface
 {
     use ModelAwareTrait;
+    use RevokeTokenRepositoryTrait;
 
     /**
      * @var RefreshTokensTable
@@ -69,10 +71,7 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
             return;
         }
 
-        $token = $this->table->get($tokenId);
-        $token->revoked = true;
-
-        $this->table->save($token);
+        $this->revokeToken($tokenId);
     }
 
     /**
@@ -80,11 +79,22 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      */
     public function isRefreshTokenRevoked($tokenId)
     {
-        $conditions = [
-            $this->table->aliasField($this->table->getPrimaryKey()) => $tokenId,
-            $this->table->aliasField('revoked') => false,
-        ];
+        return $this->isTokenRevoked($tokenId);
+    }
 
-        return !$this->table->exists($conditions);
+    /**
+     * @return string
+     */
+    protected function getDeleteRecordOnRevokeKeyName(): string
+    {
+        return 'OAuthServer.deleteRefreshTokenOnRevoke';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getTable(): Table
+    {
+        return $this->table;
     }
 }
