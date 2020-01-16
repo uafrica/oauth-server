@@ -40,6 +40,7 @@ class UserRepository implements UserRepositoryInterface
 
     /**
      * @param RepositoryInterface $finder the User's table
+     * @return void
      */
     public function setFinder(RepositoryInterface $finder): void
     {
