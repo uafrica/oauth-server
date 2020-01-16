@@ -2,12 +2,15 @@
 
 namespace OAuthServer\Test\TestCase\Controller;
 
+use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Http\ServerRequest;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\RouteBuilder;
 use Cake\Routing\Router;
 use Cake\TestSuite\IntegrationTestCase;
+use Defuse\Crypto\Key;
+use League\OAuth2\Server\CryptTrait;
 use OAuthServer\Controller\OAuthController;
 use OAuthServer\Model\Table\AccessTokensTable;
 use OAuthServer\Model\Table\AuthCodesTable;
@@ -16,6 +19,8 @@ use TestApp\Controller\TestAppController;
 
 class OAuthControllerTest extends IntegrationTestCase
 {
+    use CryptTrait;
+
     public $fixtures = [
         'plugin.OAuthServer.Clients',
         'plugin.OAuthServer.Scopes',
@@ -42,7 +47,10 @@ class OAuthControllerTest extends IntegrationTestCase
      */
     private $AuthCodes;
 
-    /** @noinspection PhpIncludeInspection */
+    /**
+     * @noinspection PhpIncludeInspection
+     * @noinspection PhpUnhandledExceptionInspection
+     */
     public function setUp()
     {
         // class Router needs to be loaded in order for TestCase to automatically include routes
@@ -60,6 +68,8 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->AccessTokens = TableRegistry::getTableLocator()->get('OAuthServer.AccessTokens');
         $this->RefreshTokens = TableRegistry::getTableLocator()->get('OAuthServer.RefreshTokens');
         $this->AuthCodes = TableRegistry::getTableLocator()->get('OAuthServer.AuthCodes');
+
+        $this->setEncryptionKey(Key::loadFromAsciiSafeString(Configure::read('OAuthServer.encryptionKey')));
     }
 
     public function tearDown()
@@ -176,6 +186,11 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertStringStartsWith('http://www.example.com?code=', $redirectUrl);
         parse_str(parse_url($redirectUrl, PHP_URL_QUERY), $responseQuery);
 
+        // check authorization code stored in the database.
+        $codeDecrypted = json_decode($this->decrypt($responseQuery['code']), true);
+        $this->assertTrue($this->AuthCodes->exists(['code' => $codeDecrypted['auth_code_id']]), 'generated auth code exists');
+
+        // Logged out and get access token.
         $this->session(['Auth.User.id' => null]);
 
         $this->post('/oauth/access_token', [
@@ -192,6 +207,19 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertSame(3600, $response['expires_in']);
         $this->assertArrayHasKey('access_token', $response);
         $this->assertArrayHasKey('refresh_token', $response);
+
+        // check revoked authorization code
+        $this->assertTrue($this->AuthCodes->exists(['code' => $codeDecrypted['auth_code_id'], 'revoked' => true]), 'revoked auth code');
+
+        // check token stored in the database.
+        $tokenDecrypted = json_decode($this->decrypt($response['refresh_token']), true);
+        $this->assertTrue($this->AccessTokens->exists([
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+        ]), 'generated access token exists');
+        $this->assertTrue($this->RefreshTokens->exists([
+            'refresh_token' => $tokenDecrypted['refresh_token_id'],
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+        ]), 'generated refresh token exists');
     }
 
     public function testNotPermitedAuthorization()
@@ -243,6 +271,16 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertArrayHasKey('access_token', $response);
         $this->assertArrayHasKey('refresh_token', $response);
 
+        // check token stored in the database.
+        $tokenDecrypted = json_decode($this->decrypt($response['refresh_token']), true);
+        $this->assertTrue($this->AccessTokens->exists([
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+        ]), 'generated access token exists');
+        $this->assertTrue($this->RefreshTokens->exists([
+            'refresh_token' => $tokenDecrypted['refresh_token_id'],
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+        ]), 'generated refresh token exists');
+
         $this->post('/oauth/access_token', [
             'grant_type' => 'refresh_token',
             'client_id' => 'TEST',
@@ -258,6 +296,27 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertArrayHasKey('refresh_token', $refreshed);
         $this->assertNotEquals($response['access_token'], $refreshed['access_token']);
         $this->assertNotEquals($response['refresh_token'], $refreshed['refresh_token']);
+
+        // check revoked previous token
+        $this->assertTrue($this->AccessTokens->exists([
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+            'revoked' => true,
+        ]), 'revoked access token');
+        $this->assertTrue($this->RefreshTokens->exists([
+            'refresh_token' => $tokenDecrypted['refresh_token_id'],
+            'oauth_token' => $tokenDecrypted['access_token_id'],
+            'revoked' => true,
+        ]), 'revoked refresh token');
+
+        // check token stored in the database.
+        $refreshedTokenDecrypted = json_decode($this->decrypt($refreshed['refresh_token']), true);
+        $this->assertTrue($this->AccessTokens->exists([
+            'oauth_token' => $refreshedTokenDecrypted['access_token_id'],
+        ]), 'generated access token exists');
+        $this->assertTrue($this->RefreshTokens->exists([
+            'refresh_token' => $refreshedTokenDecrypted['refresh_token_id'],
+            'oauth_token' => $refreshedTokenDecrypted['access_token_id'],
+        ]), 'generated refresh token exists');
     }
 
     private function grabResponseJson()
