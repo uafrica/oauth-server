@@ -19,7 +19,7 @@ class UpgradeAccessTokensTo80 extends AbstractMigration
         $table->addColumn('user_id', 'string', [
             'default' => null,
             'limit' => 36,
-            'null' => false,
+            'null' => true,
         ]);
         $table->addColumn('revoked', 'boolean', [
             'default' => false,

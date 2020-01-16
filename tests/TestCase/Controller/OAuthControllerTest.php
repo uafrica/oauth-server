@@ -42,6 +42,7 @@ class OAuthControllerTest extends IntegrationTestCase
      */
     private $AuthCodes;
 
+    /** @noinspection PhpIncludeInspection */
     public function setUp()
     {
         // class Router needs to be loaded in order for TestCase to automatically include routes
@@ -110,7 +111,7 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertResponseCode(301);
     }
 
-    public function testAuthorizeLoginRedirect()
+    public function testAuthorizeLoginRedirectWhenNotLoggedIn()
     {
         $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
         $authorizeUrl = $this->url('/oauth/authorize') . '?' . http_build_query($query);
@@ -166,6 +167,8 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertStringStartsWith('http://www.example.com?code=', $redirectUrl);
         parse_str(parse_url($redirectUrl, PHP_URL_QUERY), $responseQuery);
 
+        $this->session(['Auth.User.id' => null]);
+
         $this->post('/oauth/access_token', [
             'grant_type' => 'authorization_code',
             'client_id' => 'TEST',
@@ -184,8 +187,6 @@ class OAuthControllerTest extends IntegrationTestCase
 
     public function testPasswordAuthorization()
     {
-        $this->session(['Auth.User.id' => 'user1']);
-
         $this->post('/oauth/access_token', [
             'grant_type' => 'password',
             'client_id' => 'TEST',
@@ -203,10 +204,25 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertArrayHasKey('refresh_token', $response);
     }
 
+    public function testClientCredentialsAuthorization()
+    {
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'TEST',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+        ]);
+        $this->assertResponseOk();
+
+        $response = $this->grabResponseJson();
+        $this->assertSame('Bearer', $response['token_type']);
+        $this->assertSame(3600, $response['expires_in']);
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayNotHasKey('refresh_token', $response);
+    }
+
     public function testRefreshToken()
     {
-        $this->session(['Auth.User.id' => 'user1']);
-
         $this->post('/oauth/access_token', [
             'grant_type' => 'password',
             'client_id' => 'TEST',
