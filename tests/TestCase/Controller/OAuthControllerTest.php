@@ -173,16 +173,21 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertArrayHasKey('refresh_token', $response);
     }
 
-    public function testNotPermitedAuthorization()
+    public function testClientCredentialsAuthorization()
     {
         $this->post('/oauth/access_token', [
             'grant_type' => 'client_credentials',
-            'client_id' => 'AuthCodeOnly',
+            'client_id' => 'TEST',
             'client_secret' => 'TestSecret',
             'scope' => 'test',
         ]);
+        $this->assertResponseOk();
 
-        $this->assertResponseError('Client authentication failed');
+        $response = $this->grabResponseJson();
+        $this->assertSame('Bearer', $response['token_type']);
+        $this->assertSame(3600, $response['expires_in']);
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayNotHasKey('refresh_token', $response);
     }
 
     public function testPasswordAuthorization()
@@ -237,6 +242,18 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertArrayHasKey('refresh_token', $refreshed);
         $this->assertNotEquals($response['access_token'], $refreshed['access_token']);
         $this->assertNotEquals($response['refresh_token'], $refreshed['refresh_token']);
+    }
+
+    public function testNotPermitedAuthorization()
+    {
+        $this->post('/oauth/access_token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'AuthCodeOnly',
+            'client_secret' => 'TestSecret',
+            'scope' => 'test',
+        ]);
+
+        $this->assertResponseError('Client authentication failed');
     }
 
     private function grabResponseJson()
