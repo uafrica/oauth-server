@@ -5,6 +5,7 @@ namespace OAuthServer\Test\TestCase\Controller\Component;
 use Cake\Controller\ComponentRegistry;
 use Cake\Controller\Component\AuthComponent;
 use Cake\Controller\Controller;
+use Cake\Core\Configure;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\TestSuite\TestCase;
@@ -56,7 +57,7 @@ class OAuthComponentTest extends TestCase
             ],
         ]);
 
-        $this->component = new OAuthComponent($this->componentRegistry, []);
+        $this->component = new OAuthComponent($this->componentRegistry, Configure::read('OAuthServer', []));
     }
 
     public function tearDown()
