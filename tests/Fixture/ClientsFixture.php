@@ -33,8 +33,23 @@ class ClientsFixture extends TestFixture
             'client_secret' => 'TestSecret',
             'name' => 'Test',
             'redirect_uri' => json_encode(['http://www.example.com']),
-            'grant_types' => null,
+            'grant_types' => json_encode([
+                'client_credentials',
+                'password',
+                'authorization_code',
+                'refresh_token',
+            ]),
+        ];
 
+        $this->records[] = [
+            'id' => 'AuthCodeOnly',
+            'client_secret' => 'TestSecret',
+            'name' => 'Test',
+            'redirect_uri' => json_encode(['http://www.example.com']),
+            'grant_types' => json_encode([
+                'authorization_code',
+                'refresh_token',
+            ]),
         ];
 
         parent::init();

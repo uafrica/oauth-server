@@ -4,6 +4,7 @@ namespace OAuthServer\Bridge\Repository;
 
 use Cake\Datasource\ModelAwareTrait;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
+use OAuthServer\Model\Entity\Client;
 use OAuthServer\Model\Table\OauthClientsTable;
 
 /**
@@ -46,10 +47,17 @@ class ClientRepository implements ClientRepositoryInterface
             $conditions[$this->table->aliasField('client_secret')] = $clientSecret;
         }
 
-        // TODO: process $grantType
-        // if ($grantType !== null) {
-        // }
+        $client = $this->table->find()->where($conditions)->first();
+        /* @var $client Client|null */
 
-        return $this->table->exists($conditions);
+        if ($client === null) {
+            return false;
+        }
+
+        if ($grantType === null) {
+            return true;
+        }
+
+        return in_array($grantType, $client->grant_types, true);
     }
 }

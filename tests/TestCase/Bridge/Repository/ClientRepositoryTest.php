@@ -66,6 +66,14 @@ class ClientRepositoryTest extends TestCase
                 ['TEST', 'invalid', null],
                 false,
             ],
+            'valid: with grant type' => [
+                ['AuthCodeOnly', 'TestSecret', 'authorization_code'],
+                true,
+            ],
+            'invalid: with grant type' => [
+                ['AuthCodeOnly', 'TestSecret', 'password'],
+                false,
+            ],
         ];
     }
 }
