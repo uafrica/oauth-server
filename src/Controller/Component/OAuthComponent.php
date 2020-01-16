@@ -4,10 +4,8 @@ namespace OAuthServer\Controller\Component;
 
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\Component;
-use Cake\Controller\Component\AuthComponent;
 use Cake\Core\Configure;
 use Cake\Datasource\EntityInterface;
-use Cake\Datasource\RepositoryInterface;
 use Cake\Network\Exception\NotImplementedException;
 use Cake\ORM\Entity;
 use Cake\ORM\Table;
@@ -16,16 +14,12 @@ use Cake\Utility\Inflector;
 use DateInterval;
 use InvalidArgumentException;
 use League\OAuth2\Server\AuthorizationServer;
-use League\OAuth2\Server\Grant\PasswordGrant;
 use OAuthServer\Bridge\AuthorizationServerFactory;
 use OAuthServer\Bridge\GrantFactory;
 use OAuthServer\Bridge\UserFinderByUserCredentialsInterface;
-use OAuthServer\Traits\GetStorageTrait;
 
 class OAuthComponent extends Component implements UserFinderByUserCredentialsInterface
 {
-    use GetStorageTrait;
-
     /**
      * @var AuthorizationServer
      */

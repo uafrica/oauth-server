@@ -12,12 +12,9 @@ use Cake\Network\Exception\HttpException;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
 use OAuthServer\Bridge\ResourceServerFactory;
-use OAuthServer\Traits\GetStorageTrait;
 
 class OAuthAuthenticate extends BaseAuthenticate
 {
-    use GetStorageTrait;
-
     /**
      * @var ResourceServer
      */
