@@ -7,9 +7,14 @@ sudo: false
 
 env:
   matrix:
-    - DB=sqlite db_dsn='sqlite:///:memory:'
+    - CAKE_VERSION='3.5.*'
   global:
-    - DEFAULT=1
+    - DEFAULT=1 DB=sqlite db_dsn='sqlite:///:memory:'
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 
 matrix:
   fast_finish: true
@@ -18,16 +23,26 @@ matrix:
     - php: 7.1
       env: PHPCS=1 DEFAULT=0
 
-before_script:
-  - composer self-update
-  - composer install --prefer-source --no-interaction --dev
+    - php: 7.1
+      env: CODECOVERAGE=1 DEFAULT=0
 
+install:
+  - composer self-update
+  - if [ ! -z ${CAKE_VERSION} ]; then composer require cakephp/cakephp:${CAKE_VERSION}; fi
+  - composer install --prefer-dist --no-interaction
+
+before_script:
+  - if [ $DB = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi
   - phpenv rehash
   - set +H
 
 script:
   - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit; fi"
   - sh -c "if [ '$PHPCS' = '1' ]; then vendor/bin/phpcs -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config; fi"
+  - sh -c "if [ $CODECOVERAGE = '1' ]; then vendor/bin/phpunit --stderr --coverage-clover=coverage.xml; fi"
+
+after_success:
+  - if [[ $CODECOVERAGE = 1 ]]; then bash <(curl -s https://codecov.io/bash); fi
 
 notifications:
   email: false
