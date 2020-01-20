@@ -10,14 +10,14 @@ class AuthCodesFixture extends TestFixture
     public $table = 'oauth_auth_codes';
 
     public $fields = [
-        'code' => ['type' => 'string'],
+        'code' => ['type' => 'string', 'limit' => 80],
         'redirect_uri' => ['type' => 'string'],
         'expires' => ['type' => 'integer'],
         'client_id' => ['type' => 'string', 'null' => false, 'limit' => 20],
-        'user_id' => ['type' => 'string', 'null' => false, 'limit' => 36],
+        'user_id' => ['type' => 'string', 'null' => false, 'limit' => 80],
         'revoked' => ['type' => 'boolean', 'default' => false, 'null' => false],
-        'created' => ['type' => 'timestamp'],
-        'modified' => ['type' => 'timestamp'],
+        'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
+        'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['code']],
         ],

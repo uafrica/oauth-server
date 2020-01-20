@@ -15,12 +15,12 @@ class RefreshTokensFixture extends TestFixture
     public $table = 'oauth_refresh_tokens';
 
     public $fields = [
-        'refresh_token' => ['type' => 'string', 'null' => false, 'limit' => 40],
-        'oauth_token' => ['type' => 'string', 'null' => false, 'limit' => 40],
+        'refresh_token' => ['type' => 'string', 'null' => false, 'limit' => 80],
+        'oauth_token' => ['type' => 'string', 'null' => false, 'limit' => 80],
         'expires' => ['type' => 'integer'],
         'revoked' => ['type' => 'boolean', 'default' => false, 'null' => false],
-        'created' => ['type' => 'timestamp'],
-        'modified' => ['type' => 'timestamp'],
+        'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
+        'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['refresh_token']],
         ],

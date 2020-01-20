@@ -19,8 +19,8 @@ class ClientsFixture extends TestFixture
         'name' => ['type' => 'string', 'limit' => 200, 'null' => false],
         'redirect_uri' => ['type' => 'text', 'null' => false],
         'grant_types' => ['type' => 'text', 'null' => true],
-        'created' => ['type' => 'timestamp'],
-        'modified' => ['type' => 'timestamp'],
+        'created' => ['type' => 'timestamp', 'null' => true, 'default' => null],
+        'modified' => ['type' => 'timestamp', 'null' => true, 'default' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id']],
         ],
