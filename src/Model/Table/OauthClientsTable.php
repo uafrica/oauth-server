@@ -58,12 +58,12 @@ class OauthClientsTable extends Table
         $validator->maxLength('id', 20);
         $validator->maxLength('client_secret', 40);
         $validator
-            ->requirePresence('name')
+            ->requirePresence('name', 'create')
             ->maxLength('name', 200)
             ->notEmpty('name');
 
         $validator
-            ->requirePresence('redirect_uri')
+            ->requirePresence('redirect_uri', 'create')
             ->isArray('redirect_uri')
             ->add('redirect_uri', 'url', [
                 'rule' => static function ($check) {
