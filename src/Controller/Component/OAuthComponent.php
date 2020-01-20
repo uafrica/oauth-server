@@ -50,32 +50,16 @@ class OAuthComponent extends Component implements UserFinderByUserCredentialsInt
     ];
 
     /**
-     * @return AuthorizationServer
-     */
-    public function getServer(): AuthorizationServer
-    {
-        if (!$this->Server) {
-            $factory = new AuthorizationServerFactory(
-                $this->getConfig('privateKey'),
-                $this->getConfig('encryptionKey')
-            );
-
-            $this->Server = $factory->create();
-        }
-
-        return $this->Server;
-    }
-
-    /**
      * @param array $config Config array
      * @return void
      */
     public function initialize(array $config): void
     {
         if ($this->getConfig('server') && $this->getConfig('server') instanceof AuthorizationServer) {
-            $this->Server = $this->getConfig('server');
+            $this->setServer($this->getConfig('server'));
         }
 
+        // setup enabled grant types.
         $server = $this->getServer();
         $supportedGrants = $this->getConfig('supportedGrants');
         $supportedGrants = $this->_registry->normalizeArray($supportedGrants);
@@ -104,6 +88,32 @@ class OAuthComponent extends Component implements UserFinderByUserCredentialsInt
 
             $server->enableGrantType($objGrant, new DateInterval($this->getConfig('accessTokenTTL')));
         }
+    }
+
+    /**
+     * @return AuthorizationServer
+     */
+    public function getServer(): AuthorizationServer
+    {
+        if (!$this->Server) {
+            $factory = new AuthorizationServerFactory(
+                $this->getConfig('privateKey'),
+                $this->getConfig('encryptionKey')
+            );
+
+            $this->setServer($factory->create());
+        }
+
+        return $this->Server;
+    }
+
+    /**
+     * @param AuthorizationServer $Server a AuthorizationServer instance.
+     * @return void
+     */
+    public function setServer(AuthorizationServer $Server): void
+    {
+        $this->Server = $Server;
     }
 
     /**

@@ -12,6 +12,7 @@ use Cake\Network\Exception\HttpException;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\ResourceServer;
 use OAuthServer\Bridge\ResourceServerFactory;
+use Psr\Http\Message\ServerRequestInterface;
 
 class OAuthAuthenticate extends BaseAuthenticate
 {
@@ -50,8 +51,8 @@ class OAuthAuthenticate extends BaseAuthenticate
     {
         parent::__construct($registry, $config);
 
-        if ($this->getConfig('server') && $this->getConfig('server') instanceof ResourceServer) {
-            $this->Server = $this->getConfig('server');
+        if ($this->getConfig('server')) {
+            $this->setServer($this->getConfig('server'));
 
             return;
         }
@@ -67,10 +68,19 @@ class OAuthAuthenticate extends BaseAuthenticate
                 $this->getConfig('publicKey', Configure::read('OAuthServer.publicKey'))
             );
 
-            $this->Server = $serverFactory->create();
+            $this->setServer($serverFactory->create());
         }
 
         return $this->Server;
+    }
+
+    /**
+     * @param ResourceServer $Server the ResourceServer instance
+     * @return void
+     */
+    public function setServer(ResourceServer $Server): void
+    {
+        $this->Server = $Server;
     }
 
     /**
@@ -107,7 +117,7 @@ class OAuthAuthenticate extends BaseAuthenticate
     }
 
     /**
-     * @param ServerRequest $request Request object
+     * @param ServerRequest|ServerRequestInterface $request Request object
      * @return array|bool|mixed
      */
     public function getUser(ServerRequest $request)
