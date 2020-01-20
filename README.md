@@ -21,11 +21,37 @@ Once composer has installed the package, the plugin needs to be activated by run
 $ bin/cake plugin load -r OAuthServer
 ```
 
-Finally the database migrations need to be run.
+The database migrations need to be run.
 
 ```bash
 $ bin/cake migrations migrate --plugin OAuthServer
 ```
+
+Generating `private and public keys` (see also https://oauth2.thephpleague.com/installation/):
+
+```bash
+openssl genrsa -out config/oauth.pem 2048
+openssl rsa -in config/oauth.pem -pubout -out config/oauth.pub
+```
+
+Generating `encryption key` :
+
+```bash
+vendor/bin/generate-defuse-key
+(COPY result hash)
+```
+
+Change your app.php, Add `OAuthServer` configuration :
+
+```bash
+    'OAuthServer' => [
+        'privateKey' => CONFIG . 'oauth.pem',
+        'publicKey' => CONFIG . 'oauth.pub',
+        'encryptionKey' => 'def0000060c80a6856e8...', // <- SET encryption key FROM `vendor/bin/generate-defuse-key`
+    ],
+```
+
+NOTICE: private key and encryption key is confidential. Try to set as much as possible with environment variables and not upload to the source code repository.
 
 ## Configuration
 
