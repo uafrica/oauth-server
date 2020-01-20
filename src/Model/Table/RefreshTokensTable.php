@@ -22,8 +22,10 @@ use OAuthServer\Model\Entity\RefreshToken;
  * @method RefreshToken[] patchEntities($entities, array $data, array $options = [])
  * @method RefreshToken findOrCreate($search, callable $callback = null, $options = [])
  */
-class RefreshTokensTable extends Table
+class RefreshTokensTable extends Table implements RevocableTokensTableInterface
 {
+    use RevocableTokensTableTrait;
+
     /**
      * {@inheritDoc}
      */

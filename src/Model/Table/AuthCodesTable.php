@@ -26,8 +26,10 @@ use OAuthServer\Model\Entity\AuthCode;
  * @method AuthCode[] patchEntities($entities, array $data, array $options = [])
  * @method AuthCode findOrCreate($search, callable $callback = null, $options = [])
  */
-class AuthCodesTable extends Table
+class AuthCodesTable extends Table implements RevocableTokensTableInterface
 {
+    use RevocableTokensTableTrait;
+
     /**
      * {@inheritDoc}
      */

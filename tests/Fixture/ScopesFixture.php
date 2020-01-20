@@ -25,5 +25,6 @@ class ScopesFixture extends TestFixture
 
     public $records = [
         ['id' => 'test', 'description' => ''],
+        ['id' => 'awesome', 'description' => ''],
     ];
 }

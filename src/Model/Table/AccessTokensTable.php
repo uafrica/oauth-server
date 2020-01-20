@@ -26,8 +26,10 @@ use OAuthServer\Model\Entity\AccessToken;
  * @method AccessToken[] patchEntities($entities, array $data, array $options = [])
  * @method AccessToken findOrCreate($search, callable $callback = null, $options = [])
  */
-class AccessTokensTable extends Table
+class AccessTokensTable extends Table implements RevocableTokensTableInterface
 {
+    use RevocableTokensTableTrait;
+
     /**
      * {@inheritDoc}
      */
