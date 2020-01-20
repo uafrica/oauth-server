@@ -1,16 +1,18 @@
 # OAuth2 Server for CakePHP 3
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.txt)
-[![Build Status](https://img.shields.io/travis/uafrica/oauth-server/master.svg?style=flat-square)](https://travis-ci.org/uafrica/oauth-server)
+[![Build Status](https://img.shields.io/travis/nojimage/cakephp-oauth-server/0.8.x.svg?style=flat-square)](https://travis-ci.org/nojimage/cakephp-oauth-server)
 
 A plugin for implementing an OAuth2 server in CakePHP 3. Built on top of the [PHP League's OAuth2 Server](http://oauth2.thephpleague.com/). Currently we support the following grant types: AuthCode, RefreshToken, ClientCredentials.
 
+This repository is a fork of [uafrica/oauth-server](https://github.com/uafrica/oauth-server).
+
 ## Installation
 
-Installation is done using composer. Run:
+You can install this plugin into your CakePHP application using. Run:
 
 ```bash
-$ composer require uafrica/oauth-server
+$ composer require elstc/cakephp-oauth-server
 ```
 
 Once composer has installed the package, the plugin needs to be activated by running:
@@ -50,15 +52,17 @@ public function login()
         $user = $this->Auth->identify();
         if ($user) {
             $this->Auth->setUser($user);
+
             $redirectUri = $this->Auth->redirectUrl();
-            if ($this->request->query['redir'] === 'oauth') {
+            if ($this->request->getQuery('redir') === 'oauth') {
                 $redirectUri = [
                     'plugin' => 'OAuthServer',
                     'controller' => 'OAuth',
                     'action' => 'authorize',
-                    '?' => $this->request->query
+                    '?' => $this->request->getQueryParams(),
                 ];
             }
+
             return $this->redirect($redirectUri);
         } else {
             $this->Flash->error(
@@ -109,7 +113,7 @@ use Crud\Controller\ControllerTrait;
 /**
  * OauthClients Controller
  *
- * @property \OAuthServer\Model\Table\ClientsTable $Clients
+ * @property \OAuthServer\Model\Table\OauthClientsTable $Clients
  */
 class ClientsController extends AppController
 {
@@ -202,7 +206,7 @@ use Crud\Controller\ControllerTrait;
 /**
  * Scopes Controller
  *
- * @property \OAuthServer\Model\Table\ScopesTable $Scopes
+ * @property \OAuthServer\Model\Table\OauthScopesTable $Scopes
  */
 class ScopesController extends AppController
 {
@@ -288,6 +292,5 @@ The server also fires a number of events that can be used to inject values into 
 * `OAuthServer.beforeAuthorize` - On rendering of the approval page for the user.
 * `OAuthServer.afterAuthorize` - On the user authorising the client
 * `OAuthServer.afterDeny` - On the user denying the client
-* `OAuthServer.getUser` - On loading user details for authentication requests.
 
 You can customise the OAuth authorise page by creating a overriding template file in `src/Template/Plugin/OAuthServer/OAuth/authorize.ctp`
