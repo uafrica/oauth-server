@@ -49,10 +49,10 @@ trait RevokeTokenRepositoryTrait
     {
         $conditions = [
             $this->getTable()->aliasField($this->getTable()->getPrimaryKey()) => $tokenId,
-            $this->getTable()->aliasField('revoked') => false,
         ];
+        $entity = $this->getTable()->find()->where($conditions)->first();
 
-        return !$this->getTable()->exists($conditions);
+        return ($entity === null) || $entity->revoked;
     }
 
     /**
