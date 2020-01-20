@@ -8,7 +8,9 @@ use Cake\Event\Event;
 use Cake\ORM\Table;
 use Cake\Utility\Security;
 use Cake\Utility\Text;
+use Cake\Validation\Validation;
 use Cake\Validation\Validator;
+use OAuthServer\Bridge\GrantTypes;
 use OAuthServer\Model\Entity\Client;
 
 /**
@@ -62,10 +64,38 @@ class OauthClientsTable extends Table
 
         $validator
             ->requirePresence('redirect_uri')
-            ->isArray('redirect_uri');
+            ->isArray('redirect_uri')
+            ->add('redirect_uri', 'url', [
+                'rule' => static function ($check) {
+                    $check = (array)$check;
+                    foreach ($check as $uri) {
+                        if (!Validation::url($uri, true)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                },
+                'message' => __('the redirect_uri contains invalid uri.'),
+            ]);
+
         $validator
             ->isArray('grant_types')
-            ->allowEmpty('grant_types');
+            ->allowEmpty('grant_types')
+            ->add('grant_types', 'allowed', [
+                'rule' => static function ($check) {
+                    $check = (array)$check;
+                    $validGrantTypes = GrantTypes::getAllowedGrantTypes();
+                    foreach ($check as $grantType) {
+                        if (!in_array($grantType, $validGrantTypes, true)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                },
+                'message' => __('the grant_types contains invalid grant type.'),
+            ]);
 
         return $validator;
     }
