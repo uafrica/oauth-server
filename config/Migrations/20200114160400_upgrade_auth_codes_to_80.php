@@ -5,11 +5,17 @@ use Migrations\AbstractMigration;
 
 class UpgradeAuthCodesTo80 extends AbstractMigration
 {
-    public function up()
+    public function change()
     {
         $table = $this->table('oauth_auth_codes');
 
         $table->removeColumn('session_id');
+
+        $table->changeColumn('code', 'string', [
+            'default' => null,
+            'limit' => 80,
+            'null' => false,
+        ]);
 
         $table->addColumn('client_id', 'string', [
             'default' => null,
@@ -26,27 +32,6 @@ class UpgradeAuthCodesTo80 extends AbstractMigration
             'null' => false,
         ]);
         $table->addTimestamps('created', 'modified');
-
-        $table->update();
-    }
-
-    public function down()
-    {
-        $table = $this->table('oauth_auth_codes');
-        $table->addColumn(
-            'session_id',
-            'integer',
-            [
-                'default' => null,
-                'limit' => 11,
-                'null' => false,
-            ]
-        );
-        $table->removeColumn('client_id');
-        $table->removeColumn('user_id');
-        $table->removeColumn('revoked');
-        $table->removeColumn('created');
-        $table->removeColumn('modified');
 
         $table->update();
     }

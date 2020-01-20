@@ -1,6 +1,9 @@
 <?php
 /** @noinspection AutoloadingIssuesInspection */
 
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
 use Migrations\AbstractMigration;
 
 class UpgradeClientsTo80 extends AbstractMigration
@@ -17,10 +20,29 @@ class UpgradeClientsTo80 extends AbstractMigration
         $table->addTimestamps('created', 'modified');
 
         $table->update();
+
+        $clients = TableRegistry::getTableLocator()->get('OauthClients');
+        $clients->find()->all()
+            ->each(static function (EntityInterface $entity) use ($clients) {
+                if (is_string($entity->redirect_uri)) {
+                    $entity->redirect_uri = json_encode([$entity->redirect_uri]);
+                    $clients->save($entity);
+                }
+            });
     }
 
     public function down()
     {
+        $clients = TableRegistry::getTableLocator()->get('OauthClients');
+        $clients->find()->all()
+            ->each(static function (EntityInterface $entity) use ($clients) {
+                $redirectUrl = $entity->redirect_uri;
+                if (preg_match('/\A\[.+\]\z/', $redirectUrl)) {
+                    $entity->redirect_uri = json_decode($redirectUrl, true)[0];
+                    $clients->save($entity);
+                }
+            });
+
         $table = $this->table('oauth_clients');
         $table->changeColumn('redirect_uri', 'string', [
             'default' => null,
