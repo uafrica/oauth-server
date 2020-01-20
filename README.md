@@ -12,19 +12,19 @@ This repository is a fork of [uafrica/oauth-server](https://github.com/uafrica/o
 You can install this plugin into your CakePHP application using. Run:
 
 ```bash
-$ composer require elstc/cakephp-oauth-server
+composer require elstc/cakephp-oauth-server
 ```
 
 Once composer has installed the package, the plugin needs to be activated by running:
 
 ```bash
-$ bin/cake plugin load -r OAuthServer
+bin/cake plugin load -b -r OAuthServer
 ```
 
 The database migrations need to be run.
 
 ```bash
-$ bin/cake migrations migrate --plugin OAuthServer
+bin/cake migrations migrate -p OAuthServer
 ```
 
 Generating `private and public keys` (see also https://oauth2.thephpleague.com/installation/):
