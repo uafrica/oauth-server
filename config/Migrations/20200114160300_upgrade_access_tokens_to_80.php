@@ -5,7 +5,7 @@ use Migrations\AbstractMigration;
 
 class UpgradeAccessTokensTo80 extends AbstractMigration
 {
-    public function change()
+    public function up()
     {
         $table = $this->table('oauth_access_tokens');
 
@@ -32,6 +32,27 @@ class UpgradeAccessTokensTo80 extends AbstractMigration
             'null' => false,
         ]);
         $table->addTimestamps('created', 'modified');
+
+        $table->update();
+    }
+
+    public function down()
+    {
+        $table = $this->table('oauth_access_tokens');
+        $table->addColumn(
+            'session_id',
+            'integer',
+            [
+                'default' => null,
+                'limit' => 11,
+                'null' => false,
+            ]
+        );
+        $table->removeColumn('client_id');
+        $table->removeColumn('user_id');
+        $table->removeColumn('revoked');
+        $table->removeColumn('created');
+        $table->removeColumn('modified');
 
         $table->update();
     }
