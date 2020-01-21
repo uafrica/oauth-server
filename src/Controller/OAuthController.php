@@ -82,7 +82,10 @@ class OAuthController extends AppController
             if ($this->request->is('post')) {
                 $response = $server->completeAuthorizationRequest($authRequest, $this->response);
 
-                $this->dispatchEvent('OAuthServer.afterAuthorize', [$authRequest]);
+                $event = $this->dispatchEvent('OAuthServer.afterAuthorize', [$authRequest, $response]);
+                if (!$event->isStopped() && $event->getResult() instanceof ResponseInterface) {
+                    return $response;
+                }
 
                 return $response;
             }
