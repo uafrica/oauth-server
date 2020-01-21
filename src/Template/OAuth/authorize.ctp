@@ -12,11 +12,11 @@
 </ul>
 <?php
 echo $this->Form->create(null);
-echo $this->Form->input(__('Approve'), [
+echo $this->Form->control('Approve', [
     'name' => 'authorization',
     'type' => 'submit'
 ]);
-echo $this->Form->input(__('Deny'), [
+echo $this->Form->control('Deny', [
     'name' => 'authorization',
     'type' => 'submit'
 ]);
