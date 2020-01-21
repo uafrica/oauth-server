@@ -69,7 +69,11 @@ class OauthClientsTable extends Table
                 'rule' => static function ($check) {
                     $check = (array)$check;
                     foreach ($check as $uri) {
-                        if (!Validation::url($uri, true)) {
+                        if (preg_match('!\Ahttps?://!', $uri) && !Validation::url($uri, true)) {
+                            return false;
+                        }
+                        if (!preg_match('!\A(?:[A-z][A-z0-9+-.]+)://!', $uri)) {
+                            // not have url scheme
                             return false;
                         }
                     }

@@ -47,6 +47,10 @@ class OauthClientsTableTest extends TestCase
                 ['http://example.com/callback'],
                 [],
             ],
+            'valid: one valid url scheme as app' => [
+                ['com.example.app://callback'],
+                [],
+            ],
             'valid: two valid uri' => [
                 ['http://example.com/callback', 'https://example.co.jp/auth'],
                 [],
