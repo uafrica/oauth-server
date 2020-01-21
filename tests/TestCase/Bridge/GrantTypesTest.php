@@ -2,7 +2,6 @@
 
 namespace OAuthServer\Test\TestCase\Bridge;
 
-use League\OAuth2\Server\Grant\AuthCodeGrant;
 use OAuthServer\Bridge\GrantTypes;
 use PHPUnit\Framework\TestCase;
 
