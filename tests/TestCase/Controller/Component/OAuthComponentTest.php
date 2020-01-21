@@ -2,8 +2,8 @@
 
 namespace OAuthServer\Test\TestCase\Controller\Component;
 
-use Cake\Controller\ComponentRegistry;
 use Cake\Controller\Component\AuthComponent;
+use Cake\Controller\ComponentRegistry;
 use Cake\Controller\Controller;
 use Cake\Core\Configure;
 use Cake\Http\Response;
@@ -69,6 +69,15 @@ class OAuthComponentTest extends TestCase
     public function testInitialize()
     {
         $this->assertInstanceOf(AuthorizationServer::class, $this->component->getServer());
+    }
+
+    public function testInitializeSupportedGrants()
+    {
+        $config = Configure::read('OAuthServer', []);
+        $config['supportedGrants'] = ['Password', 'RefreshToken'];
+        $component = new OAuthComponent($this->componentRegistry, $config);
+
+        $this->assertSame(['Password', 'RefreshToken'], $component->getConfig('supportedGrants'));
     }
 
     public function testGetPrimaryKey()

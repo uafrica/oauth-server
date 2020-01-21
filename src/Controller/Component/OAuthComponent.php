@@ -58,6 +58,10 @@ class OAuthComponent extends Component implements UserFinderByUserCredentialsInt
         if ($this->getConfig('server') && $this->getConfig('server') instanceof AuthorizationServer) {
             $this->setServer($this->getConfig('server'));
         }
+        // Override supportedGrants option without merging.
+        if (isset($config['supportedGrants'])) {
+            $this->setConfig('supportedGrants', $config['supportedGrants'], false);
+        }
 
         // setup enabled grant types.
         $server = $this->getServer();
