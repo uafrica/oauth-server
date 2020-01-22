@@ -84,7 +84,7 @@ class OAuthController extends AppController
 
                 $event = $this->dispatchEvent('OAuthServer.afterAuthorize', [$authRequest, $response]);
                 if (!$event->isStopped() && $event->getResult() instanceof ResponseInterface) {
-                    return $response;
+                    return $event->getResult();
                 }
 
                 return $response;
