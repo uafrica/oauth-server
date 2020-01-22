@@ -4,7 +4,6 @@ namespace OAuthServer\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Core\Configure;
-use Cake\Event\Event;
 use Cake\Network\Exception\HttpException;
 use Cake\Network\Response;
 use League\OAuth2\Server\Exception\OAuthServerException;
@@ -30,15 +29,6 @@ class OAuthController extends AppController
 
         $this->loadComponent('OAuthServer.OAuth', Configure::read('OAuthServer', []));
         $this->loadComponent('RequestHandler');
-    }
-
-    /**
-     * @param Event $event Event object.
-     * @return void
-     */
-    public function beforeFilter(Event $event): void
-    {
-        parent::beforeFilter($event);
 
         if (!$this->components()->has('Auth')) {
             throw new RuntimeException('OAuthServer requires Auth component to be loaded and properly configured');
@@ -46,6 +36,16 @@ class OAuthController extends AppController
 
         $this->Auth->allow(['oauth', 'accessToken']);
         $this->Auth->deny(['authorize']);
+
+        // if accessToken action, disable CsrfComponent|SecrityComponent
+        if ($this->request->getParam('action') === 'accessToken') {
+            if ($this->components()->has('Csrf')) {
+                $this->components()->unload('Csrf');
+            }
+            if ($this->components()->has('Security')) {
+                $this->components()->unload('Security');
+            }
+        }
     }
 
     /**
