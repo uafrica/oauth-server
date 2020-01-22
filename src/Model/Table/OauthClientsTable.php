@@ -113,7 +113,7 @@ class OauthClientsTable extends Table
     public function beforeSave(Event $event, Client $client): void
     {
         if ($client->isNew()) {
-            $client->id = $this->generateClientId();
+            $client->id = $client->id ?? $this->generateClientId();
             $client->client_secret = $this->generateSecret();
         }
     }

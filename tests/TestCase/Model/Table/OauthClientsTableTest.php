@@ -107,4 +107,33 @@ class OauthClientsTableTest extends TestCase
             ],
         ];
     }
+
+    public function testAutoGenerationIdAndSecret()
+    {
+        $entityWithoutId = $this->Clients->newEntity([
+            'name' => 'without id',
+            'redirect_uri' => ['https://example.com/oauth/callback'],
+        ]);
+
+        $this->Clients->saveOrFail($entityWithoutId);
+
+        $this->assertNotEmpty($entityWithoutId->id);
+        $this->assertNotEmpty($entityWithoutId->client_secret);
+    }
+
+    public function testAutoGenerationSecret()
+    {
+        $entityWithId = $this->Clients->newEntity([
+            'id' => 'specific-id',
+            'name' => 'with id',
+            'redirect_uri' => ['https://example.com/oauth/callback'],
+        ], [
+            'accessibleFields' => ['id' => true],
+        ]);
+
+        $this->Clients->saveOrFail($entityWithId);
+
+        $this->assertSame('specific-id', $entityWithId->id);
+        $this->assertNotEmpty($entityWithId->client_secret);
+    }
 }
