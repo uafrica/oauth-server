@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * For php-fpm|php-cgi
+ * For apache + php-fpm|php-cgi
  *
  * Set Authorization header from HTTP_AUTHORIZATION|REDIRECT_HTTP_AUTHORIZATION environment
  */
