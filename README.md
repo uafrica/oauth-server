@@ -15,17 +15,29 @@ You can install this plugin into your CakePHP application using. Run:
 composer require elstc/cakephp-oauth-server
 ```
 
-Once composer has installed the package, the plugin needs to be activated by running:
+### Load plugin
 
-```bash
-bin/cake plugin load -b -r OAuthServer
+(CakePHP >= 3.6.0) Load the plugin by adding the following statement in your project's `src/Application.php`:
+
 ```
+$this->addPlugin('OAuthServer');
+```
+
+(CakePHP <= 3.5.x) Load the plugin by adding the following statement in your project's `config/bootstrap.php` file:
+
+```
+Plugin::load('OAuthServer', ['bootstrap' => true, 'route' => true]);
+```
+
+### Run database migration
 
 The database migrations need to be run.
 
 ```bash
 bin/cake migrations migrate -p OAuthServer
 ```
+
+### Generating and setup keys
 
 Generating `private and public keys` (see also https://oauth2.thephpleague.com/installation/):
 
@@ -52,6 +64,45 @@ Change your app.php, Add `OAuthServer` configuration :
 ```
 
 NOTICE: private key and encryption key is confidential. Try to set as much as possible with environment variables and not upload to the source code repository.
+
+### for Apache HTTP Server + php-fpm or php-cgi
+
+Authorization header is not transparent in Apache HTTP Server with php-fpm.
+So some settings are needed.
+
+Adding the following statement to webroot/.htaccess:
+
+```
+# Apache HTTP Server 2.4.13 and later and use mod_proxy / mod_proxy_fcgi
+CGIPassAuth on
+
+# Apache HTTP Server 2.4.12 and older
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+```
+
+And apply `\OAuthServer\Middleware\AuthorizationEnvironmentMiddleware` on your application:
+
+```php
+class Application extends BaseApplication
+{
+    public function middleware($middleware)
+    {
+        $middleware
+            ->add(ErrorHandlerMiddleware::class)
+
+            ->add(AssetMiddleware::class)
+
+            // ADD THIS: bypass Authorization environment to request header
+            ->add(\OAuthServer\Middleware\AuthorizationEnvironmentMiddleware::class)
+
+            ->add(RoutingMiddleware::class);
+
+        return $middleware;
+    }
+}
+```
+
+It is recommended to insert between AssetMiddleware and RoutingMiddleware.
 
 ## Configuration
 
