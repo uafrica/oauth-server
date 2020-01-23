@@ -5,7 +5,7 @@ namespace OAuthServer\Controller\Component;
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\Component;
 use Cake\Datasource\EntityInterface;
-use Cake\Network\Exception\NotImplementedException;
+use Cake\Http\Exception\NotImplementedException;
 use Cake\ORM\Entity;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;

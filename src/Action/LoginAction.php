@@ -39,7 +39,7 @@ class LoginAction extends BaseAction
     /**
      * HTTP POST handler
      *
-     * @return \Cake\Network\Response
+     * @return \Cake\Http\Response
      */
     protected function _post()
     {
@@ -59,7 +59,7 @@ class LoginAction extends BaseAction
      *
      * @param \Crud\Event\Subject $subject Event subject.
      * @param array $user Authenticated user record data.
-     * @return \Cake\Network\Response
+     * @return \Cake\Http\Response
      */
     protected function _success(Subject $subject, array $user)
     {

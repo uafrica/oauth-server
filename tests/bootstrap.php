@@ -34,7 +34,8 @@ $loader->register();
 $loader->addNamespace('TestApp', APP);
 Configure::write('debug', true);
 Configure::write('App', [
-    'namespace' => 'App',
+    'namespace' => 'TestApp',
+    'base' => '',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
         'templates' => [ROOT . 'Template' . DS],
@@ -78,8 +79,5 @@ if (version_compare(Configure::version(), '3.6.0', '>=')) {
 }
 
 Plugin::load('OAuthServer', ['path' => $root . DS, 'bootstrap' => true, 'route' => true]);
-
-DispatcherFactory::add('Routing');
-DispatcherFactory::add('ControllerFactory');
 
 error_reporting(E_ALL);

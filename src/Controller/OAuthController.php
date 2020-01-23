@@ -4,8 +4,8 @@ namespace OAuthServer\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Core\Configure;
-use Cake\Network\Exception\HttpException;
-use Cake\Network\Response;
+use Cake\Http\Exception\HttpException;
+use Cake\Http\Response;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use OAuthServer\Bridge\Entity\User;
 use OAuthServer\Controller\Component\OAuthComponent;
@@ -29,6 +29,7 @@ class OAuthController extends AppController
 
         $this->loadComponent('OAuthServer.OAuth', Configure::read('OAuthServer', []));
         $this->loadComponent('RequestHandler');
+        $this->RequestHandler->setConfig('enableBeforeRedirect', false);
 
         if (!$this->components()->has('Auth')) {
             throw new RuntimeException('OAuthServer requires Auth component to be loaded and properly configured');
