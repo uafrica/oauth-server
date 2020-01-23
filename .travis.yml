@@ -28,8 +28,6 @@ matrix:
   include:
     - php: 7.1
       env: CAKE_VERSION='3.5.*' DEFAULT=1 DB=sqlite db_dsn='sqlite:///:memory:'
-    - php: 7.3
-      env: CAKE_VERSION='3.5.*' DEFAULT=1 DB=sqlite db_dsn='sqlite:///:memory:'
 
     - php: 7.1
       env: DEFAULT=1 DB=mysql db_dsn='mysql://root@0.0.0.0/cakephp_test'
