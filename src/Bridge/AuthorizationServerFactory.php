@@ -4,6 +4,7 @@ namespace OAuthServer\Bridge;
 
 use Defuse\Crypto\Key;
 use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
@@ -32,24 +33,24 @@ class AuthorizationServerFactory
     private $scopeRepository;
 
     /**
-     * @var string
+     * @var CryptKey
      */
-    private $privateKeyPath;
+    private $privateKey;
 
     /**
-     * @var Key|string
+     * @var Key
      */
     private $encryptionKey;
 
     /**
      * AuthorizationServerFactory constructor.
      *
-     * @param string $privateKeyPath the PrivateKey's path
-     * @param Key|string $encryptionKey the Encryption key string or Key object
+     * @param CryptKey|string $privateKey the PrivateKey's path or a CryptKey instance.
+     * @param Key|string $encryptionKey the Encryption key string or a Key instance,
      */
-    public function __construct(string $privateKeyPath, $encryptionKey)
+    public function __construct($privateKey, $encryptionKey)
     {
-        $this->setPrivateKeyPath($privateKeyPath);
+        $this->setPrivateKey($privateKey);
         $this->setEncryptionKey($encryptionKey);
     }
 
@@ -62,7 +63,7 @@ class AuthorizationServerFactory
             $this->getClientRepository(),
             $this->getAccessTokenRepository(),
             $this->getScopeRepository(),
-            $this->getPrivateKeyPath(),
+            $this->getPrivateKey(),
             $this->getEncryptionKey()
         );
     }
@@ -131,24 +132,28 @@ class AuthorizationServerFactory
     }
 
     /**
-     * @return string
+     * @return CryptKey
      */
-    public function getPrivateKeyPath(): string
+    public function getPrivateKey(): CryptKey
     {
-        return $this->privateKeyPath;
+        return $this->privateKey;
     }
 
     /**
-     * @param string $privateKeyPath the PrivateKey's path
+     * @param CryptKey|string $privateKey the PrivateKey's path or a CryptKey instance.
      * @return void
      */
-    public function setPrivateKeyPath(string $privateKeyPath): void
+    public function setPrivateKey($privateKey): void
     {
-        $this->privateKeyPath = $privateKeyPath;
+        if (is_string($privateKey)) {
+            $privateKey = new CryptKey($privateKey);
+        }
+
+        $this->privateKey = $privateKey;
     }
 
     /**
-     * @return Key|string
+     * @return Key
      */
     public function getEncryptionKey(): Key
     {
@@ -156,12 +161,13 @@ class AuthorizationServerFactory
     }
 
     /**
-     * @param Key|string $encryptionKey the Encryption key string or Key object
+     * @param Key|string $encryptionKey the Encryption key string or a Key instance,
      * @return void
      */
     public function setEncryptionKey($encryptionKey): void
     {
         if (is_string($encryptionKey)) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $encryptionKey = Key::loadFromAsciiSafeString($encryptionKey);
         }
 
