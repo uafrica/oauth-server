@@ -7,6 +7,12 @@ A plugin for implementing an OAuth2 server in CakePHP 3. Built on top of the [PH
 
 This repository is a fork of [uafrica/oauth-server](https://github.com/uafrica/oauth-server).
 
+## Requirements
+
+- PHP >= 7.1 with openssl extension
+- CakePHP >= 3.5
+- Database (MySQL, SQLite tested)
+
 ## Installation
 
 You can install this plugin into your CakePHP application using. Run:
@@ -19,13 +25,13 @@ composer require elstc/cakephp-oauth-server
 
 (CakePHP >= 3.6.0) Load the plugin by adding the following statement in your project's `src/Application.php`:
 
-```
+```php
 $this->addPlugin('OAuthServer');
 ```
 
 (CakePHP <= 3.5.x) Load the plugin by adding the following statement in your project's `config/bootstrap.php` file:
 
-```
+```php
 Plugin::load('OAuthServer', ['bootstrap' => true, 'route' => true]);
 ```
 
@@ -55,7 +61,7 @@ vendor/bin/generate-defuse-key
 
 Change your app.php, Add `OAuthServer` configuration :
 
-```bash
+```php
     'OAuthServer' => [
         'privateKey' => CONFIG . 'oauth.pem',
         'publicKey' => CONFIG . 'oauth.pub',
@@ -371,3 +377,67 @@ The server also fires a number of events that can be used to inject values into 
 * `OAuthServer.afterDeny` - On the user denying the client
 
 You can customise the OAuth authorise page by creating a overriding template file in `src/Template/Plugin/OAuthServer/OAuth/authorize.ctp`
+
+### Component/Authenticator Options
+
+- `OAuthServer.privateKey`
+
+REQUIRED: Set your private key filepath.
+
+The key file should be don't readable other user. (file permission is `400`, `440`, `600`, `640`, `660`)
+
+- `OAuthServer.publicKey`
+
+REQUIRED: Set your public key filepath. That generated from the above private key.
+
+The key file should be don't readable other user. (file permission is `400`, `440`, `600`, `640`, `660`)
+
+- `OAuthServer.encryptionKey`
+
+REQUIRED: Set your encryption key string. That generated from `vendor/bin/generate-defuse-key` command.
+
+- `OAuthServer.accessTokenTTL`
+
+Optional: Set access token TTL. Specify a format that can be interpreted by the [DateInterval](https://www.php.net/manual/en/dateinterval.construct.php) class.
+
+default: `PT1H` (1 hour)
+
+- `OAuthServer.refreshTokenTTL`
+
+Optional: Set refresh token TTL. Specify a format that can be interpreted by the [DateInterval](https://www.php.net/manual/en/dateinterval.construct.php) class.
+
+default: `P1M` (1 month)
+
+- `OAuthServer.authCodeTTL`
+
+Optional: Set auth code TTL. Specify a format that can be interpreted by the [DateInterval](https://www.php.net/manual/en/dateinterval.construct.php) class.
+
+default: `PT10M` (10 minutes)
+
+- `OAuthServer.supportedGrants`
+
+Optional: Set supported grant types. This option can be the following list: `AuthCode`, `RefreshToken`, `ClientCredentials`, `Password`.
+
+default: `['AuthCode', 'RefreshToken', 'ClientCredentials', 'Password']`
+
+- `OAuthServer.passwordAuthenticator`
+
+Optional: Set Authenticator that use password grant. Set this if your application uses a non default authenticator.
+
+default: `Form`
+
+### OAuthAuthenticate Options
+
+- `continue`
+
+Optional: If set to false, if OAuth authentication fails, stop processing there.
+
+default: `true`
+
+- `fields.username`
+
+Optional: Specify the user's primary key field.
+
+default: `id`
+
+more configuration options see: https://book.cakephp.org/3.0/en/controllers/components/authentication.html#configuring-authentication-handlers
