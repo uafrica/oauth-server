@@ -32,7 +32,7 @@ class OAuthAuthenticate extends BaseAuthenticate
      * @var array
      */
     protected $_defaultConfig = [
-        'continue' => false,
+        'continue' => true,
         'publicKey' => null,
         'fields' => [
             'username' => 'id',
