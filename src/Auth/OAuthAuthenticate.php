@@ -6,7 +6,7 @@ use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\ComponentRegistry;
 use Cake\Core\Configure;
 use Cake\Http\Exception\BadRequestException;
-use Cake\Http\Exception\HttpException;
+use Cake\Http\Exception\UnauthorizedException;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use League\OAuth2\Server\Exception\OAuthServerException;
@@ -32,7 +32,7 @@ class OAuthAuthenticate extends BaseAuthenticate
      * @var array
      */
     protected $_defaultConfig = [
-        'continue' => true,
+        'continue' => false,
         'publicKey' => null,
         'fields' => [
             'username' => 'id',
@@ -107,9 +107,7 @@ class OAuthAuthenticate extends BaseAuthenticate
         }
 
         if (isset($this->_exception)) {
-            // ignoring $e->getHttpHeaders() for now
-            // it only sends WWW-Authenticate header in case of InvalidClientException
-            throw new HttpException($this->_exception->getMessage(), $this->_exception->getHttpStatusCode(), $this->_exception);
+            throw new UnauthorizedException($this->_exception->getMessage(), $this->_exception->getHttpStatusCode(), $this->_exception);
         }
 
         $message = __d('authenticate', 'You are not authenticated.');

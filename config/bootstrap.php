@@ -13,9 +13,12 @@ class_alias($appControllerReal, $appControllerAlias);
 if (!class_exists('Cake\Http\Exception\HttpException')) {
     class_alias('Cake\Network\Exception\HttpException', 'Cake\Http\Exception\HttpException');
 }
+if (!class_exists('Cake\Http\Exception\BadRequestException')) {
+    class_alias('Cake\Network\Exception\BadRequestException', 'Cake\Http\Exception\BadRequestException');
+}
 if (!class_exists('Cake\Http\Exception\NotImplementedException')) {
     class_alias('Cake\Network\Exception\NotImplementedException', 'Cake\Http\Exception\NotImplementedException');
 }
-if (!class_exists('Cake\Http\Exception\BadRequestException')) {
-    class_alias('Cake\Network\Exception\BadRequestException', 'Cake\Http\Exception\BadRequestException');
+if (!class_exists('Cake\Http\Exception\UnauthorizedException')) {
+    class_alias('Cake\Network\Exception\UnauthorizedException', 'Cake\Http\Exception\UnauthorizedException');
 }
