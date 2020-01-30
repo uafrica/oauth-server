@@ -430,9 +430,10 @@ default: `Form`
 
 - `continue`
 
-Optional: If set to false, if OAuth authentication fails, stop processing there.
+Optional: If set to true, if OAuth authentication fails, not stop processing there.
+Use this when you want to use only authentication information without requiring login.
 
-default: `true`
+default: `false`
 
 - `fields.username`
 
