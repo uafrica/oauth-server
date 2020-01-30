@@ -70,7 +70,7 @@ class OAuthAuthenticateTest extends TestCase
         ]);
 
         FrozenTime::setTestNow();
-        TableRegistry::clear();
+        TableRegistry::getTableLocator()->clear();
     }
 
     public function testAuthenticate()
@@ -95,5 +95,14 @@ class OAuthAuthenticateTest extends TestCase
         $request = new ServerRequest('posts/index');
 
         $this->assertFalse($this->auth->authenticate($request, $this->response));
+    }
+
+    public function testUnauthenticatedWithContinue()
+    {
+        $request = new ServerRequest('posts/index');
+
+        $this->auth->setConfig('continue', true);
+
+        $this->assertFalse($this->auth->unauthenticated($request, $this->response));
     }
 }

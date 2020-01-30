@@ -98,12 +98,12 @@ class OAuthAuthenticate extends BaseAuthenticate
     /**
      * @param ServerRequest $request Request to get authentication information from.
      * @param Response $response A response object that can have headers added.
-     * @return void
+     * @return bool|void
      */
     public function unauthenticated(ServerRequest $request, Response $response)
     {
         if ($this->getConfig('continue')) {
-            return;
+            return false;
         }
 
         if (isset($this->_exception)) {
