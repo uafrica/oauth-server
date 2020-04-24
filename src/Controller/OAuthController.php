@@ -4,6 +4,7 @@ namespace OAuthServer\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Core\Configure;
+use Cake\Event\Event;
 use Cake\Http\Exception\HttpException;
 use Cake\Http\Response;
 use League\OAuth2\Server\Exception\OAuthServerException;
@@ -46,6 +47,28 @@ class OAuthController extends AppController
             if ($this->components()->has('Security')) {
                 $this->components()->unload('Security');
             }
+        }
+    }
+
+    /**
+     * on Controller.initialize
+     *
+     * @param Event $event the event
+     * @return void
+     */
+    public function beforeFilter(Event $event): void
+    {
+        // if prompt=login on authorize action, then logout and remove prompt params
+        if (
+            $this->request->getParam('action') === 'authorize'
+            && $this->request->getQuery('prompt') === 'login'
+        ) {
+            $this->Auth->logout();
+
+            $query = $this->request->getQueryParams();
+            unset($query['prompt']);
+            $uri = $this->request->getUri();
+            $this->request = $this->request->withUri($uri->withQuery(http_build_query($query)));
         }
     }
 

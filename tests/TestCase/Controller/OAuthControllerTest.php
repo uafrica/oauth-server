@@ -129,6 +129,19 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertResponseContains('Test would like to access:');
     }
 
+    public function testAuthorizeLoginRedirectWhenWithPromptLogin()
+    {
+        $this->session(['Auth.User.id' => 'user1']);
+        $query = ['prompt' => 'login', 'client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
+        $authorizeUrl = $this->url('/oauth/authorize') . '?' . http_build_query($query);
+        unset($query['prompt']);
+        $expectedLoginRedirectUrl = $this->url('/oauth/authorize') . '?' . http_build_query($query);
+        $this->get($authorizeUrl);
+
+        $this->assertSession(null, 'Auth.User.id', 'will logged out');
+        $this->assertRedirect(['plugin' => false, 'controller' => 'Users', 'action' => 'login', '?' => ['redirect' => $expectedLoginRedirectUrl]]);
+    }
+
     public function testAuthorizationCodeDeny()
     {
         $this->session(['Auth.User.id' => 'user1']);
