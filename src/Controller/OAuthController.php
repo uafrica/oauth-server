@@ -38,7 +38,7 @@ class OAuthController extends AppController
         $this->Auth->allow(['oauth', 'accessToken']);
         $this->Auth->deny(['authorize']);
 
-        // if accessToken action, disable CsrfComponent|SecrityComponent
+        // if accessToken action, disable CsrfComponent|SecurityComponent
         if ($this->request->getParam('action') === 'accessToken') {
             if ($this->components()->has('Csrf')) {
                 $this->components()->unload('Csrf');
