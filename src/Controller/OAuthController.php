@@ -68,7 +68,9 @@ class OAuthController extends AppController
             $query = $this->request->getQueryParams();
             unset($query['prompt']);
             $uri = $this->request->getUri();
-            $this->request = $this->request->withUri($uri->withQuery(http_build_query($query)));
+            $this->request = $this->request
+                ->withQueryParams($query)
+                ->withUri($uri->withQuery(http_build_query($query)));
         }
     }
 
