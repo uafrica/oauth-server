@@ -139,7 +139,7 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->get($authorizeUrl);
 
         $this->assertSession(null, 'Auth.User.id', 'will logged out');
-        $this->assertRedirect(['plugin' => false, 'controller' => 'Users', 'action' => 'login', '?' => ['redirect' => $expectedLoginRedirectUrl]]);
+        $this->assertRedirect($expectedLoginRedirectUrl);
     }
 
     public function testAuthorizationCodeDeny()

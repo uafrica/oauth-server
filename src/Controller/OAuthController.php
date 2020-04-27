@@ -54,9 +54,9 @@ class OAuthController extends AppController
      * on Controller.initialize
      *
      * @param Event $event the event
-     * @return void
+     * @return Response|null
      */
-    public function beforeFilter(Event $event): void
+    public function beforeFilter(Event $event): ?Response
     {
         // if prompt=login on authorize action, then logout and remove prompt params
         if (
@@ -67,11 +67,14 @@ class OAuthController extends AppController
 
             $query = $this->request->getQueryParams();
             unset($query['prompt']);
-            $uri = $this->request->getUri();
-            $this->request = $this->request
-                ->withQueryParams($query)
-                ->withUri($uri->withQuery(http_build_query($query)));
+
+            return $this->redirect([
+                'action' => 'authorize',
+                '?' => $query,
+            ]);
         }
+
+        return null;
     }
 
     /**
