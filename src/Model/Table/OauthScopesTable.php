@@ -12,7 +12,7 @@ use OAuthServer\Model\Entity\Scope;
  * Scope Model
  *
  * @property HasMany|AccessTokenScopesTable $AccessTokenScopes
- * @property HasMany|AuthCodeScopesTable $AuthCodeScopes
+ * @property HasMany|OauthAuthCodeScopesTable $AuthCodeScopes
  *
  * @method Scope get($primaryKey, $options = [])
  * @method Scope newEntity($data = null, array $options = [])

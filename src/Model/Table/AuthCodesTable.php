@@ -15,7 +15,7 @@ use OAuthServer\Model\Entity\AuthCode;
  * AuthCode Model
  *
  * @property BelongsTo|OauthClientsTable $OauthClients
- * @property HasMany|AuthCodeScopesTable $AuthCodeScopes
+ * @property HasMany|OauthAuthCodeScopesTable $AuthCodeScopes
  * @property BelongsToMany|OauthScopesTable $OauthScopes
  *
  * @method AuthCode get($primaryKey, $options = [])
