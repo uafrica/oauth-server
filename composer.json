@@ -9,7 +9,7 @@
         "ext-openssl": "*",
         "cakephp/cakephp": "^3.5.18",
         "league/oauth2-server": "~8.0.0",
-        "cakephp/migrations": "~1.7.0"
+        "cakephp/migrations": "2.*"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
