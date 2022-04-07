@@ -46,7 +46,7 @@ class AuthCodesTable extends Table implements RevocableTokensTableInterface
             'propertyName' => 'client',
         ]);
         $this->hasMany('AuthCodeScopes', [
-            'className' => 'OAuthServer.AuthCodeScopes',
+            'className' => 'OAuthServer.OauthAuthCodeScopes',
             'foreignKey' => 'auth_code',
             'dependant' => true,
         ]);
