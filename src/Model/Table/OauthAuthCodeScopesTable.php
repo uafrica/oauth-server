@@ -9,7 +9,7 @@ use Cake\ORM\Table;
 /**
  * Class AuthCodeScopesTable
  *
- * @property BelongsTo|OauthAuthCodeScopesTable $AuthCodes
+ * @property BelongsTo|AuthCodesTable $AuthCodes
  * @property BelongsTo|OauthScopesTable $OauthScopes
  */
 class OauthAuthCodeScopesTable extends Table
