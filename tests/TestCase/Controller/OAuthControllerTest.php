@@ -124,9 +124,7 @@ class OAuthControllerTest extends IntegrationTestCase
         $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
         $this->get($this->url('/oauth/authorize') . '?' . http_build_query($query));
 
-        $this->assertResponseOk();
-
-        $this->assertResponseContains('Test would like to access:');
+        $this->assertResponseCode(302);
     }
 
     public function testAuthorizeLoginRedirectWhenWithPromptLogin()
@@ -140,19 +138,6 @@ class OAuthControllerTest extends IntegrationTestCase
 
         $this->assertSession(null, 'Auth.User.id', 'will logged out');
         $this->assertRedirect($expectedLoginRedirectUrl);
-    }
-
-    public function testAuthorizationCodeDeny()
-    {
-        $this->session(['Auth.User.id' => 'user1']);
-
-        $query = ['client_id' => 'TEST', 'redirect_uri' => 'http://www.example.com', 'response_type' => 'code', 'scope' => 'test'];
-        $this->post($this->url('/oauth/authorize') . '?' . http_build_query($query), ['authorization' => 'Deny']);
-
-        $this->assertRedirect();
-
-        $redirectUrl = $this->_response->getHeaderLine('Location');
-        $this->assertStringStartsWith('http://www.example.comerror=access_denied&message=', $redirectUrl);
     }
 
     public function testAuthorizationCode()
