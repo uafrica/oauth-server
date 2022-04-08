@@ -104,11 +104,13 @@ class OAuthController extends AppController
                 $authRequest->setUser(new User($userId));
             }
 
-            if ($this->request->getData('authorization') === 'Approve') {
+            $autoApprove = $this->request->getQuery('approval_prompt') === 'auto';
+
+            if ($autoApprove || $this->request->getData('authorization') === 'Approve') {
                 $authRequest->setAuthorizationApproved(true);
             }
 
-            if ($this->request->is('post')) {
+            if ($autoApprove || $this->request->is('post')) {
                 $response = $server->completeAuthorizationRequest($authRequest, $this->response);
 
                 $event = $this->dispatchEvent('OAuthServer.afterAuthorize', [$authRequest, $response]);
