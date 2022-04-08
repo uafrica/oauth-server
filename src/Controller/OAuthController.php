@@ -104,7 +104,8 @@ class OAuthController extends AppController
                 $authRequest->setUser(new User($userId));
             }
 
-            $autoApprove = $this->request->getQuery('approval_prompt') === 'auto';
+            // We want this to always go without manual approval
+            $autoApprove = true;
 
             if ($autoApprove || $this->request->getData('authorization') === 'Approve') {
                 $authRequest->setAuthorizationApproved(true);
