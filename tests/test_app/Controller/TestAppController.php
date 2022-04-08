@@ -13,14 +13,16 @@ class TestAppController extends Controller
             'authenticate' => [
                 AuthComponent::ALL => [
                     'userModel' => 'Users',
+                    'fields' => ['username' => 'email'],
                 ],
                 'OAuthServer.OAuth',
                 'Form',
             ],
             'loginAction' => [
+                'plugin' => false,
                 'controller' => 'Users',
                 'action' => 'login',
-            ]
+            ],
         ]);
     }
 }

@@ -1,7 +1,10 @@
 <?php
-if ($response instanceof \League\OAuth2\Server\Exception\OAuthException) {
+
+use League\OAuth2\Server\Exception\OAuthServerException;
+
+if ($response instanceof OAuthServerException) {
     echo json_encode([
-        'error' => $response->errorType,
+        'error' => $response->getErrorType(),
         'message' => $response->getMessage()
     ]);
 } else {

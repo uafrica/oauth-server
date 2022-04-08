@@ -8,18 +8,17 @@ use Crud\Traits\RedirectTrait;
 
 class LoginAction extends BaseAction
 {
-
     use RedirectTrait;
 
     protected $_defaultConfig = [
         'enabled' => true,
         'messages' => [
             'success' => [
-                'text' => 'Successfully logged you in'
+                'text' => 'Successfully logged you in',
             ],
             'error' => [
-                'text' => 'Invalid credentials, please try again'
-            ]
+                'text' => 'Invalid credentials, please try again',
+            ],
         ],
     ];
 
@@ -40,7 +39,7 @@ class LoginAction extends BaseAction
     /**
      * HTTP POST handler
      *
-     * @return \Cake\Network\Response
+     * @return \Cake\Http\Response
      */
     protected function _post()
     {
@@ -60,7 +59,7 @@ class LoginAction extends BaseAction
      *
      * @param \Crud\Event\Subject $subject Event subject.
      * @param array $user Authenticated user record data.
-     * @return \Cake\Network\Response
+     * @return \Cake\Http\Response
      */
     protected function _success(Subject $subject, array $user)
     {
@@ -76,7 +75,7 @@ class LoginAction extends BaseAction
                 'plugin' => 'OAuthServer',
                 'controller' => 'OAuth',
                 'action' => 'authorize',
-                '?' => $this->_request()->query
+                '?' => $this->_request()->query,
             ];
         }
 

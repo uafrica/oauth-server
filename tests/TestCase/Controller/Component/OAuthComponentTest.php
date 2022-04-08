@@ -3,49 +3,96 @@
 namespace OAuthServer\Test\TestCase\Controller\Component;
 
 use Cake\Controller\ComponentRegistry;
+use Cake\Controller\Component\AuthComponent;
+use Cake\Controller\Controller;
+use Cake\Core\Configure;
+use Cake\Http\Response;
+use Cake\Http\ServerRequest;
 use Cake\TestSuite\TestCase;
-use League\OAuth2\Server\Grant\RefreshTokenGrant;
+use League\OAuth2\Server\AuthorizationServer;
 use OAuthServer\Controller\Component\OAuthComponent;
 
 class OAuthComponentTest extends TestCase
 {
-    public function testDefaultTokenTTL()
-    {
-        $component = new OAuthComponent(new ComponentRegistry(), []);
-        $this->assertEquals(3600, $component->Server->getAccessTokenTTL());
-    }
-
-    public function testConfigTokenTTL()
-    {
-        $component = new OAuthComponent(new ComponentRegistry(), [
-            'accessTokenTTL' => 5
-        ]);
-        $this->assertEquals(5, $component->Server->getAccessTokenTTL());
-    }
+    public $fixtures = [
+        'plugin.OAuthServer.Clients',
+        'plugin.OAuthServer.Scopes',
+        'plugin.OAuthServer.AccessTokens',
+        'plugin.OAuthServer.AccessTokenScopes',
+        'plugin.OAuthServer.AuthCodes',
+        'plugin.OAuthServer.AuthCodeScopes',
+        'plugin.OAuthServer.RefreshTokens',
+        'plugin.OAuthServer.Users',
+    ];
 
     /**
-     * @expectedException \League\OAuth2\Server\Exception\InvalidGrantException
+     * @var ComponentRegistry
      */
-    public function testGrantWhitelist()
-    {
-        $component = new OAuthComponent(new ComponentRegistry(), [
-            'supportedGrants' => ['AuthCode'],
-        ]);
-        $component->Server->getGrantType('refresh_token');
-    }
+    private $componentRegistry;
 
-    public function testGrantConfig()
+    /**
+     * @var OAuthComponent
+     */
+    private $component;
+
+    /**
+     * @var Controller|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private $controller;
+
+    public function setUp()
     {
-        $component = new OAuthComponent(new ComponentRegistry(), [
-            'supportedGrants' => [
-                'RefreshToken' => [
-                    'refreshTokenTTL' => 4
-                ]
+        parent::setUp();
+        $this->controller = new Controller(new ServerRequest(), new Response());
+        $this->componentRegistry = new ComponentRegistry($this->controller);
+        $this->controller->Auth = new AuthComponent($this->componentRegistry, [
+            'authenticate' => [
+                AuthComponent::ALL => [
+                    'userModel' => 'Users',
+                    'fields' => [
+                        'username' => 'email',
+                    ],
+                ],
+                'Form',
             ],
         ]);
 
-    /** @var RefreshTokenGrant $grant */
-        $grant = $component->Server->getGrantType('refresh_token');
-        $this->assertEquals(4, $grant->getRefreshTokenTTL());
+        $this->component = new OAuthComponent($this->componentRegistry, Configure::read('OAuthServer', []));
+    }
+
+    public function tearDown()
+    {
+        unset($this->component, $this->componentRegistry);
+        parent::tearDown();
+    }
+
+    public function testInitialize()
+    {
+        $this->assertInstanceOf(AuthorizationServer::class, $this->component->getServer());
+    }
+
+    public function testInitializeSupportedGrants()
+    {
+        $config = Configure::read('OAuthServer', []);
+        $config['supportedGrants'] = ['Password', 'RefreshToken'];
+        $component = new OAuthComponent($this->componentRegistry, $config);
+
+        $this->assertSame(['Password', 'RefreshToken'], $component->getConfig('supportedGrants'));
+    }
+
+    public function testGetPrimaryKey()
+    {
+        $this->assertSame('id', $this->component->getPrimaryKey());
+    }
+
+    public function testFindUser()
+    {
+        $result = $this->component->findUser('user1@example.com', '123456');
+        $this->assertSame('user1', $result->get('id'));
+
+        $result = $this->component->findUser('user2@example.com', '654321');
+        $this->assertSame('user2', $result->get('id'));
+
+        $this->assertNull($this->component->findUser('user1@example.com', '654321'));
     }
 }

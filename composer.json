@@ -1,34 +1,48 @@
 {
-    "name": "martinusdev/oauth-server",
+    "name": "elstc/cakephp-oauth-server",
     "description": "OAuth Server for CakePHP 3 using the PHP League's OAuth2 Server",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "oauth", "oauth2", "oauth server", "oauth2 server"],
     "require": {
-        "php": ">= 5.5",
-        "cakephp/cakephp": "~3.0",
-        "league/oauth2-server": "~4.1",
-        "cakephp/migrations": "~2.0"
+        "php": ">= 7.2",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "cakephp/cakephp": "^3.5.18",
+        "league/oauth2-server": "~8.3.4",
+        "cakephp/migrations": "2.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
-        "cakephp/cakephp-codesniffer": "^2.3"
+        "phpunit/phpunit": "^6.0",
+        "cakephp/cakephp-codesniffer": "^3.2.1"
     },
     "autoload": {
-      "psr-4": {
-        "OAuthServer\\": "src"
-      }
+        "psr-4": {
+            "OAuthServer\\": "src"
+        }
     },
     "autoload-dev": {
-      "psr-4": {
-        "Cake\\Test\\": "./vendor/cakephp/cakephp/tests",
-        "OAuthServer\\Test\\": "tests"
-      }
+        "psr-4": {
+            "OAuthServer\\Test\\": "tests",
+            "TestApp\\": "./tests/test_app/",
+            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
+        }
+    },
+    "replace": {
+        "uafrica/oauth-server": "*"
     },
     "license": "MIT",
     "authors": [
         {
             "name": "Walther Lalk",
             "email": "walther@uafrica.com"
+        },
+        {
+            "name": "nojimage",
+            "email": "nojimage@gmail.com"
         }
-    ]
+    ],
+    "scripts": {
+        "cs-check": "phpcs --colors -ps --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config",
+        "cs-fix": "phpcbf -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config"
+    }
 }

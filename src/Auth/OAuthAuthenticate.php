@@ -1,33 +1,30 @@
 <?php
+
 namespace OAuthServer\Auth;
 
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\ComponentRegistry;
-use Cake\Core\App;
-use Cake\Database\Exception;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Network\Exception\BadRequestException;
-use Cake\Network\Exception\HttpException;
-use Cake\Network\Request;
-use Cake\Network\Response;
-use Cake\ORM\TableRegistry;
-use League\OAuth2\Server\Exception\OAuthException;
-use OAuthServer\Traits\GetStorageTrait;
+use Cake\Core\Configure;
+use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Exception\UnauthorizedException;
+use Cake\Http\Response;
+use Cake\Http\ServerRequest;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\ResourceServer;
+use OAuthServer\Bridge\ResourceServerFactory;
+use Psr\Http\Message\ServerRequestInterface;
 
 class OAuthAuthenticate extends BaseAuthenticate
 {
-    use GetStorageTrait;
-
     /**
-     * @var \League\OAuth2\Server\ResourceServer
+     * @var ResourceServer
      */
-    public $Server;
+    protected $Server;
 
     /**
      * Exception that was thrown by oauth server
      *
-     * @var \League\OAuth2\Server\Exception\OAuthException
+     * @var OAuthServerException
      */
     protected $_exception;
 
@@ -36,129 +33,109 @@ class OAuthAuthenticate extends BaseAuthenticate
      */
     protected $_defaultConfig = [
         'continue' => false,
-        'storages' => [
-            'session' => [
-                'className' => 'OAuthServer.Session'
-            ],
-            'accessToken' => [
-                'className' => 'OAuthServer.AccessToken'
-            ],
-            'client' => [
-                'className' => 'OAuthServer.Client'
-            ],
-            'scope' => [
-                'className' => 'OAuthServer.Scope'
-            ]
+        'publicKey' => null,
+        'fields' => [
+            'username' => 'id',
         ],
-        'resourceServer' => [
-            'className' => 'League\OAuth2\Server\ResourceServer'
-        ],
-        'contain' => null
+        'userModel' => 'Users',
+        'scope' => [],
+        'finder' => 'all',
+        'contain' => null,
     ];
 
     /**
-     * @param \Cake\Controller\ComponentRegistry $registry Component registry
+     * @param ComponentRegistry $registry Component registry
      * @param array $config Config array
      */
     public function __construct(ComponentRegistry $registry, $config)
     {
         parent::__construct($registry, $config);
 
-        if ($this->config('server')) {
-            $this->Server = $this->config('server');
+        if ($this->getConfig('server')) {
+            $this->setServer($this->getConfig('server'));
 
             return;
         }
+    }
 
-        $serverConfig = $this->config('resourceServer');
-        $serverClassName = App::className($serverConfig['className']);
+    /**
+     * @return ResourceServer
+     */
+    protected function getServer(): ResourceServer
+    {
+        if (!$this->Server) {
+            $serverFactory = new ResourceServerFactory(
+                $this->getConfig('publicKey', Configure::read('OAuthServer.publicKey'))
+            );
 
-        if (!$serverClassName) {
-            throw new Exception('ResourceServer class was not found.');
+            $this->setServer($serverFactory->create());
         }
 
-        $server = new $serverClassName(
-            $this->_getStorage('session'),
-            $this->_getStorage('accessToken'),
-            $this->_getStorage('client'),
-            $this->_getStorage('scope')
-        );
+        return $this->Server;
+    }
 
-        $this->Server = $server;
+    /**
+     * @param ResourceServer $Server the ResourceServer instance
+     * @return void
+     */
+    public function setServer(ResourceServer $Server): void
+    {
+        $this->Server = $Server;
     }
 
     /**
      * Authenticate a user based on the request information.
      *
-     * @param \Cake\Network\Request $request Request to get authentication information from.
-     * @param \Cake\Network\Response $response A response object that can have headers added.
-     * @return bool
+     * @param ServerRequest $request Request to get authentication information from.
+     * @param Response $response A response object that can have headers added.
+     * @return mixed
      */
-    public function authenticate(Request $request, Response $response)
+    public function authenticate(ServerRequest $request, Response $response)
     {
         return $this->getUser($request);
     }
 
     /**
-     * @param \Cake\Network\Request $request Request to get authentication information from.
-     * @param \Cake\Network\Response $response A response object that can have headers added.
-     * @return bool|\Cake\Network\Response
+     * @param ServerRequest $request Request to get authentication information from.
+     * @param Response $response A response object that can have headers added.
+     * @return bool|void
      */
-    public function unauthenticated(Request $request, Response $response)
+    public function unauthenticated(ServerRequest $request, Response $response)
     {
-        if ($this->_config['continue']) {
+        if ($this->getConfig('continue')) {
             return false;
         }
+
         if (isset($this->_exception)) {
-            // ignoring $e->getHttpHeaders() for now
-            // it only sends WWW-Authenticate header in case of InvalidClientException
-            throw new HttpException($this->_exception->getMessage(), $this->_exception->httpStatusCode, $this->_exception);
+            throw new UnauthorizedException($this->_exception->getMessage(), $this->_exception->getHttpStatusCode(), $this->_exception);
         }
+
         $message = __d('authenticate', 'You are not authenticated.');
         throw new BadRequestException($message);
     }
 
     /**
-     * @param \Cake\Network\Request $request Request object
+     * @param ServerRequest|ServerRequestInterface $request Request object
      * @return array|bool|mixed
      */
-    public function getUser(Request $request)
+    public function getUser(ServerRequest $request)
     {
         try {
-            $this->Server->isValidRequest(true, $request->query('access_token'));
-        } catch (OAuthException $e) {
+            $request = $this->getServer()->validateAuthenticatedRequest($request);
+        } catch (OAuthServerException $e) {
             $this->_exception = $e;
 
             return false;
         }
 
-        $ownerModel = $this->Server
-            ->getAccessToken()
-            ->getSession()
-            ->getOwnerType();
+        $userId = $request->getAttribute('oauth_user_id');
 
-        $ownerId = $this->Server
-            ->getAccessToken()
-            ->getSession()
-            ->getOwnerId();
+        $result = $this->_query($userId)->first();
 
-        $options = [];
-
-        if ($this->_config['contain']) {
-            $options['contain'] = $this->_config['contain'];
+        if (empty($result)) {
+            return false;
         }
 
-        $owner = TableRegistry::get($ownerModel)
-            ->get($ownerId, $options)
-            ->toArray();
-
-        $event = new Event('OAuthServer.getUser', $request, [$ownerModel, $ownerId, $owner]);
-        EventManager::instance()->dispatch($event);
-
-        if ($event->result !== null) {
-            return $event->result;
-        } else {
-            return $owner;
-        }
+        return $result->toArray();
     }
 }

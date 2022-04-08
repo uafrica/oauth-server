@@ -1,46 +1,61 @@
 language: php
 
+services:
+  - mysql
+
 php:
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
 
 sudo: false
 
 env:
   matrix:
-    - DB=sqlite db_dsn='sqlite:///:memory:'
+    - CAKE_VERSION='3.7.*'
+    - CAKE_VERSION='3.8.*'
   global:
-    - DEFAULT=1
+    - DEFAULT=1 DB=sqlite db_dsn='sqlite:///:memory:'
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 
 matrix:
-  allow_failures:
-    - php: hhvm
-    - php: hhvm-nightly
-
   fast_finish: true
 
   include:
-    - php: 7.0
+    - php: 7.4
+      env: CAKE_VERSION='3.5.*' DEFAULT=1 DB=sqlite db_dsn='sqlite:///:memory:'
+
+    - php: 7.4
+      env: DEFAULT=1 DB=mysql db_dsn='mysql://root@0.0.0.0/cakephp_test'
+
+    - php: 7.4
       env: PHPCS=1 DEFAULT=0
 
-    - php: hhvm
-      env: HHVM=1 DB=sqlite db_dsn='sqlite:///:memory:'
+    - php: 7.4
+      env: CODECOVERAGE=1 DEFAULT=0
 
-    - php: hhvm-nightly
-      env: HHVM=1 DB=mysql db_dsn='mysql://travis@0.0.0.0/cakephp_test'
+install:
+  - composer self-update
+  - if [ ! -z ${CAKE_VERSION} ]; then composer require cakephp/cakephp:${CAKE_VERSION}; fi
+  - composer install --prefer-dist --no-interaction
 
 before_script:
-  - composer self-update
-  - composer install --prefer-source --no-interaction --dev
-
+  - if [ $DB = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test CHARACTER SET utf8 COLLATE utf8_general_ci;'; fi
   - phpenv rehash
   - set +H
+  - chmod 0600 tests/Fixture/*.pem
 
 script:
-  - sh -c "if [ '$DEFAULT' = '1' ]; then phpunit; fi"
+  - sh -c "if [ '$DEFAULT' = '1' ]; then vendor/bin/phpunit; fi"
   - sh -c "if [ '$PHPCS' = '1' ]; then vendor/bin/phpcs -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP --ignore=config/Migrations/* ./src ./tests ./config; fi"
+  - sh -c "if [ $CODECOVERAGE = '1' ]; then vendor/bin/phpunit --stderr --coverage-clover=coverage.xml; fi"
+
+after_success:
+  - if [[ $CODECOVERAGE = 1 ]]; then bash <(curl -s https://codecov.io/bash); fi
 
 notifications:
   email: false

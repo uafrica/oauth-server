@@ -8,22 +8,21 @@ use Crud\Traits\RedirectTrait;
 
 class LogoutAction extends BaseAction
 {
-
     use RedirectTrait;
 
     protected $_defaultConfig = [
         'enabled' => true,
         'messages' => [
             'success' => [
-                'text' => 'Successfully logged you out'
+                'text' => 'Successfully logged you out',
             ],
-        ]
+        ],
     ];
 
     /**
      * HTTP GET handler
      *
-     * @return void|\Cake\Network\Response
+     * @return void|\Cake\Http\Response
      */
     protected function _get()
     {
@@ -32,7 +31,7 @@ class LogoutAction extends BaseAction
 
         $subject->set([
             'success' => true,
-            'redirectUrl' => $this->_controller()->Auth->logout()
+            'redirectUrl' => $this->_controller()->Auth->logout(),
         ]);
 
         $this->_trigger('afterLogout', $subject);

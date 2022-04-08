@@ -1,14 +1,17 @@
 <?php
+/** @noinspection AutoloadingIssuesInspection */
 
-class ChangeOwnerIdField extends \Migrations\AbstractMigration
+use Migrations\AbstractMigration;
+
+class ChangeOwnerIdField extends AbstractMigration
 {
     public function up()
     {
         $table = $this->table('oauth_sessions');
         $table
             ->changeColumn('owner_id', 'string', [
-                    'limit' => 20
-                ]);
+                'limit' => 20,
+            ]);
         $table->update();
     }
 
@@ -16,8 +19,8 @@ class ChangeOwnerIdField extends \Migrations\AbstractMigration
     {
         $table = $this->table('oauth_sessions');
         $table->changeColumn('owner_id', 'int', [
-                'limit' => 11
-            ]);
+            'limit' => 11,
+        ]);
         $table->update();
     }
 }
