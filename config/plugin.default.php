@@ -3,12 +3,13 @@
 return [
     'OAuthServer' => [
         'indexMode'     => \OAuthServer\Lib\Enum\IndexMode::DISABLED,
+        'refreshTokens' => true,
         'privateKey'    => [
-            'path'     => 'file://' . __DIR__ . '/../private.key',
+            'path'     => 'file://' . __DIR__ . '/private.example.key',
             'password' => null,
         ],
         'publicKey'     => [
-            'path' => 'file://' . __DIR__ . '/../public.key',
+            'path' => 'file://' . __DIR__ . '/public.example.key',
         ],
         'encryptionKey' => 'lxZFUEsBCJ2Yb14IF2ygAHI5N4+ZAUXXaSeeJm6+twsUmIen', // See OAuthUtility shell or generate using base64_encode(random_bytes(32)),
         'ttl'           => [

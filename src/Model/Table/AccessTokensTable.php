@@ -3,6 +3,7 @@
 namespace OAuthServer\Model\Table;
 
 use Cake\Datasource\EntityInterface;
+use Cake\I18n\Time;
 use Cake\ORM\Association\HasMany;
 use Cake\ORM\Table;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
@@ -11,7 +12,9 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use OAuthServer\Model\Entity\AccessToken;
 use OAuthServer\Lib\Data\Entity\AccessToken as AccessTokenData;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use function Functional\map;
+use Exception;
 
 /**
  * OAuth 2.0 access tokens table
@@ -94,5 +97,26 @@ class AccessTokensTable extends Table implements AccessTokenRepositoryInterface
             ->find()
             ->where([$this->getPrimaryKey() => $tokenId])
             ->count();
+    }
+
+    /**
+     * Finds active (unexpired) access tokens based on the
+     * given client_id and optionally user_id
+     *
+     * @param Query $query
+     * @param array $options e.g. ['client_id' => '1234567891234567912', 'user_id' => null]
+     * @return Query
+     * @throws Exception
+     */
+    public function findActive(Query $query, array $options): Query
+    {
+        $optionsResolver = new OptionsResolver();
+        $optionsResolver->setRequired(['client_id']);
+        $optionsResolver->setDefault('user_id', null);
+        $optionsResolver->setAllowedTypes('client_id', 'string');
+        $optionsResolver->setAllowedTypes('user_id', ['string', 'null']);
+        $options = $optionsResolver->resolve($options);
+        // @TODO maybe check refresh tokens as well?
+        return $query->where(['expires >' => Time::now()->getTimestamp()] + $options);
     }
 }

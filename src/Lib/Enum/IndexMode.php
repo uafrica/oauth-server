@@ -26,7 +26,7 @@ class IndexMode extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function labels(?string $value)
+    public static function labels(?string $value = null)
     {
         $modes = [
             static::REDIRECT_TO_AUTHORIZE => 'Redirect to authorize',

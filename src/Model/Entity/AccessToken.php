@@ -17,5 +17,5 @@ use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
  */
 class AccessToken extends Entity
 {
-    use AccessTokenTrait;
+
 }

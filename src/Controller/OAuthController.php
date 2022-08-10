@@ -2,26 +2,46 @@
 
 namespace OAuthServer\Controller;
 
+use Cake\Controller\Controller;
 use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
-use Cake\I18n\Time;
-use Cake\ORM\Query;
-use UnexpectedValueException;
+use OAuthServer\Controller\Component\OAuthComponent;
 use OAuthServer\Lib\Enum\IndexMode;
-use Cake\Controller\Controller;
-
-// @TODO specify which base controller to use?
-use Exception as PhpException;
+use OAuthServer\Plugin;
+use UnexpectedValueException;
+use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use Exception as PhpException;
 
 /**
  * OAuth 2.0 process controller
+ *
+ * @TODO specify which base controller to use?
+ *
+ * @property OAuthComponent $OAuth
  */
 class OAuthController extends Controller
 {
+    /**
+     * OAuth 2.0 vendor authorization server object
+     *
+     * @var AuthorizationServer|null
+     */
+    protected ?AuthorizationServer $authorizationServer = null;
+
+    /**
+     * @inheritDoc
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadComponent('OAuthServer.OAuth');
+        $this->authorizationServer = Plugin::instance()->getAuthorizationServer();
+    }
+
     /**
      * Index action handler
      *
@@ -50,66 +70,47 @@ class OAuthController extends Controller
      *
      * @return Response
      * @TODO JSON seems to be the standard, but improve content type handling?
+     * @TODO improve exception handling?
      */
     public function authorize(): Response
     {
-        $authServer = new \League\OAuth2\Server\AuthorizationServer(); // @TODO get proper auth server
+        // Start authorization request
+        $authRequest = $this->authorizationServer->validateAuthorizationRequest($this->request);
+        $clientId    = $authRequest->getClient()->getIdentifier();
 
-        $currentTokens = $this
-            ->loadModel('OAuthServer.AccessTokens')
-            ->find()
-            ->where(['expires > ' => Time::now()->getTimestamp()])
-            ->matching('Sessions', function (Query $q) use ($ownerModel, $ownerId, $clientId) {
-                return $q->where([
-                    'owner_model' => $ownerModel,
-                    'owner_id'    => $ownerId,
-                    'client_id'   => $clientId,
-                ]);
-            })
-            ->count();
+        // Once the user has logged in set the user on the AuthorizationRequest
+        $user = $this->OAuth->getSessionUserData();
+        $authRequest->setUser($authRequest);
 
-        if ($currentTokens > 0 || ($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
-            $redirectUri = $this->authCodeGrant->newAuthorizeRequest($ownerModel, $ownerId, $this->authParams);
-            EventManager::instance()->dispatch(new Event('OAuthServer.afterAuthorize', $this));
-            return $this->redirect($redirectUri);
-        } elseif ($this->request->is('post')) {
-
-        }
-
-        /*try {
-             // Validate the HTTP request and return an AuthorizationRequest object.
-             // The auth request object can be serialized into a user's session
-             $authRequest = $authServer->validateAuthorizationRequest($request);
-
-             // Once the user has logged in set the user on the AuthorizationRequest
-             $authRequest->setUser(new UserEntity()); // @TODO implement UserEntityInterface
-
-             // Once the user has approved or denied the client update the status
-             // (true = approved, false = denied)
-             $authRequest->setAuthorizationApproved(true);
-
-             // Return the HTTP redirect response
-             return $authServer->completeAuthorizationRequest($authRequest, $response);
-         } catch (OAuthServerException $exception) {
-             return $exception->generateHttpResponse($response);
-         } catch (\Exception $exception) {
-             $body = new Stream('php://temp', 'r+');
-             $body->write($exception->getMessage());
-
-             return $response->withStatus(500)->withBody($body);
-         }*/
+        $event = new Event('OAuthServer.beforeAuthorize', $this);
+        EventManager::instance()->dispatch($event);
 
         try {
-            $response = $this->server->respondToAccessTokenRequest($request, $response);
+            // immediately approve authorization request if already has active tokens
+            if ($this->OAuth->hasActiveAccessTokens($clientId, $user->getIdentifier())) {
+                $authRequest->setAuthorizationApproved(true);
+                return $this->authorizationServer->completeAuthorizationRequest($authRequest, $this->response);
+            }
+
+            // handle form posted UI confirmation of client authorization approval
+            if ($this->request->is('post')) {
+                $authRequest->setAuthorizationApproved(false);
+                if ($this->request->data('authorization') === 'Approve') {
+                    $authRequest->setAuthorizationApproved(true);
+                }
+                return $this->authorizationServer->completeAuthorizationRequest($authRequest, $this->response);
+            }
         } catch (OAuthServerException $exception) {
             return $exception->generateHttpResponse($response);
-            // @codeCoverageIgnoreStart
         } catch (Exception $exception) {
-            return (new OAuthServerException($exception->getMessage(), 0, 'unknown_error', 500))
-                ->generateHttpResponse($response);
-            // @codeCoverageIgnoreEnd
+            $body = new Stream('php://temp', 'r+');
+            $body->write($exception->getMessage());
+            return $response->withStatus(500)->withBody($body);
         }
 
+        $this->OAuth->enrichScopes(...$authRequest->getScopes());
+        $this->set('authRequest', $authRequest);
+        return $this->response;
     }
 
     /**
@@ -117,14 +118,12 @@ class OAuthController extends Controller
      *
      * @return Response
      * @TODO JSON seems to be the standard, but improve content type handling?
+     * @TODO improve exception handling?
      */
     public function accessToken(): Response
     {
-
-
-        $authServer = new \League\OAuth2\Server\AuthorizationServer(); // @TODO get proper auth server
         try {
-            return $authServer->respondToAccessTokenRequest($request, $response);
+            return $this->authorizationServer->respondToAccessTokenRequest($request, $response);
         } catch (OAuthServerException $exception) {
             return $exception->generateHttpResponse($response);
         } catch (PhpException $exception) {

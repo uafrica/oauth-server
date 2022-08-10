@@ -35,7 +35,7 @@ class GrantType extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function classNames(?string $value)
+    public static function classNames(?string $value = null)
     {
         $classNames = [
             static::AUTHORIZATION_CODE => AuthCodeGrant::class,
@@ -53,7 +53,7 @@ class GrantType extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function labels(?string $value)
+    public static function labels(?string $value = null)
     {
         $labels = [
             static::AUTHORIZATION_CODE => 'Authorization code',

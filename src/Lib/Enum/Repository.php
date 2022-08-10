@@ -19,6 +19,7 @@ use OAuthServer\Lib\Enum\Traits\EnumTrait;
  * @method static Repository CLIENT()
  * @method static Repository REFRESH_TOKEN()
  * @method static Repository SCOPE()
+ * @method static Repository USER()
  */
 class Repository extends Enum
 {
@@ -37,7 +38,7 @@ class Repository extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function aliasDefaults(?string $value)
+    public static function aliasDefaults(?string $value = null)
     {
         $aliases = [
             static::ACCESS_TOKEN  => 'OAuthServer.AccessTokens',
@@ -56,7 +57,7 @@ class Repository extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function labels(?string $value)
+    public static function labels(?string $value = null)
     {
         $labels = [
             static::ACCESS_TOKEN  => 'Access token repository',

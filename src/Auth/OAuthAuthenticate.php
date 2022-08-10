@@ -13,6 +13,7 @@ use Cake\Event\Event;
 use Cake\Event\EventManager;
 use OAuthServer\Plugin;
 use Psr\Http\Message\ServerRequestInterface;
+use Cake\Controller\ComponentRegistry;
 
 /**
  * The CakePHP OAuth 2.0 Authenticate object

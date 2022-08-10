@@ -2,29 +2,42 @@
     "name": "uafrica/oauth-server",
     "description": "OAuth Server for CakePHP 3 using the PHP League's OAuth2 Server",
     "type": "cakephp-plugin",
-    "keywords": ["cakephp", "oauth", "oauth2", "oauth server", "oauth2 server"],
+    "keywords": [
+        "cakephp",
+        "oauth",
+        "oauth2",
+        "oauth server",
+        "oauth2 server"
+    ],
     "require": {
-        "php": ">= 5.5",
-        "cakephp/cakephp": "~3.0",
+        "php": ">=7.0",
+        "cakephp/cakephp": "3.9.*",
         "league/oauth2-server": "~8.3",
         "cakephp/migrations": "~1.0",
         "steverhoades/oauth2-openid-connect-server": "^2.4",
-        "myclabs/php-enum": "^1.8"
+        "myclabs/php-enum": "^1.8",
+        "symfony/options-resolver": "~3.4 || ~4.0 || ~5.0 || ~6.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
+        "phpunit/phpunit": "^5.7|^6.0",
         "cakephp/cakephp-codesniffer": "^2.3"
     },
     "autoload": {
-      "psr-4": {
-        "OAuthServer\\": "src"
-      }
+        "psr-4": {
+            "OAuthServer\\": "src"
+        }
     },
     "autoload-dev": {
-      "psr-4": {
-        "Cake\\Test\\": "./vendor/cakephp/cakephp/tests",
-        "OAuthServer\\Test\\": "tests"
-      }
+        "psr-4": {
+            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests",
+            "OAuthServer\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "OAuthServer\\Console\\Installer::postInstall"
+        ],
+        "test": "vendor/bin/phpunit"
     },
     "license": "MIT",
     "authors": [

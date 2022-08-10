@@ -2,3 +2,4 @@
 vendor/
 plugins/
 composer.lock
+config/test.php

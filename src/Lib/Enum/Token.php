@@ -23,7 +23,7 @@ class Token extends Enum
      * @param string|null $value
      * @return string|array
      */
-    public static function labels(?string $value)
+    public static function labels(?string $value = null)
     {
         $labels = [
             static::AUTHENTICATION_TOKEN => 'Authentication token',

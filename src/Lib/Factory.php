@@ -98,6 +98,7 @@ class Factory
      *
      * @param string[] $mapping e.g. [Repository::AUTH_CODE => 'MyPlugin.MyTable']
      * @return RepositoryInterface[] e.g. [Repository::AUTH_CODE => Object(RepositoryInterface implementation) {}]
+     * @throws Exception
      */
     public static function repositories(array $mapping): array
     {
@@ -134,6 +135,7 @@ class Factory
      * @param array            $repositoryMapping e.g. [Repository::AUTH_CODE => 'MyPlugin.MyTable', ...]
      * @return GrantTypeInterface
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public static function grantObject(
         GrantType $grantType,
@@ -215,6 +217,7 @@ class Factory
      * @param array                                $repositoryMapping
      * @param AuthorizationValidatorInterface|null $authorizationValidator
      * @return ResourceServer
+     * @throws Exception
      */
     public static function resourceServer(
         CryptKey $publicKey,
