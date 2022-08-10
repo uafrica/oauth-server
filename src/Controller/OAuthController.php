@@ -1,162 +1,152 @@
 <?php
+
 namespace OAuthServer\Controller;
 
 use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
+use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Response;
 use Cake\I18n\Time;
-use Cake\Network\Exception\HttpException;
-use Cake\Network\Response;
 use Cake\ORM\Query;
-use League\OAuth2\Server\Exception\AccessDeniedException;
-use League\OAuth2\Server\Exception\OAuthException;
-use League\OAuth2\Server\Grant\AuthCodeGrant;
-use League\OAuth2\Server\Util\RedirectUri;
+use UnexpectedValueException;
+use OAuthServer\Lib\Enum\IndexMode;
+use Cake\Controller\Controller;
+
+// @TODO specify which base controller to use?
+use Exception as PhpException;
+use League\OAuth2\Server\Exception\OAuthServerException;
 
 /**
- * Class OAuthController
- *
- * @property \OAuthServer\Controller\Component\OAuthComponent $OAuth
+ * OAuth 2.0 process controller
  */
-class OAuthController extends AppController
+class OAuthController extends Controller
 {
-    /** @var AuthCodeGrant|null */
-    private $authCodeGrant;
-
-    /** @var array|null */
-    private $authParams;
-
     /**
-     * @return void
+     * Index action handler
+     *
+     * @return Response
+     * @throws UnexpectedValueException
+     * @throws NotFoundException
      */
-    public function initialize()
+    public function index(): Response
     {
-        parent::initialize();
-
-        $this->loadComponent('OAuthServer.OAuth', (array)Configure::read('OAuthServer'));
-        $this->loadComponent('RequestHandler');
+        $mode = new IndexMode(Configure::read('OAuthServer.indexMode') ?? IndexMode::DISABLED);
+        switch ($mode->getValue()) {
+            case IndexMode::REDIRECT_TO_AUTHORIZE:
+                return $this->redirect([
+                    'action' => 'authorize',
+                    '_ext'   => $this->request->param('_ext'),
+                    '?'      => $this->request->query,
+                ], 301);
+            case IndexMode::REDIRECT_TO_STATUS:
+                return $this->redirect(['action' => 'status']);
+        }
+        throw new NotFoundException();
     }
 
     /**
-     * @param \Cake\Event\Event $event Event object.
-     * @return void
+     * Authorize action handler
+     *
+     * @return Response
+     * @TODO JSON seems to be the standard, but improve content type handling?
      */
-    public function beforeFilter(Event $event)
+    public function authorize(): Response
     {
-        parent::beforeFilter($event);
+        $authServer = new \League\OAuth2\Server\AuthorizationServer(); // @TODO get proper auth server
 
-        if (!$this->components()->has('Auth')) {
-            throw new \RuntimeException("OAuthServer requires Auth component to be loaded and properly configured");
-        }
-
-        $this->Auth->allow(['oauth', 'accessToken']);
-        $this->Auth->deny(['authorize']);
-
-        if ($this->request->param('action') == 'authorize') {
-            // OAuth spec requires to check OAuth authorize params as a first thing, regardless of whether user is logged in or not.
-            // AuthComponent checks user after beforeFilter by default, this is the place to do it.
-            try {
-                $this->authCodeGrant = $this->OAuth->Server->getGrantType('authorization_code');
-                $this->authParams = $this->authCodeGrant->checkAuthorizeParams();
-            } catch (OAuthException $e) {
-                // ignoring $e->getHttpHeaders() for now
-                // it only sends WWW-Authenticate header in case of InvalidClientException
-                throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
-            }
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function oauth()
-    {
-        $this->redirect([
-            'action' => 'authorize',
-            '_ext' => $this->request->param('_ext'),
-            '?' => $this->request->query
-        ], 301);
-    }
-
-    /**
-     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
-     * @return Response|null
-     */
-    public function authorize()
-    {
-        $clientId = $this->request->query('client_id');
-        $ownerModel = $this->Auth->config('authenticate.all.userModel');
-        $ownerId = $this->Auth->user(Configure::read("OAuthServer.models.{$ownerModel}.id") ?: 'id');
-
-        $event = new Event('OAuthServer.beforeAuthorize', $this);
-        EventManager::instance()->dispatch($event);
-
-        $serializeKeys = [];
-        if (is_array($event->result)) {
-            $this->set($event->result);
-            $serializeKeys = array_keys($event->result);
-
-            if (isset($event->result['ownerId'])) {
-                $ownerId = $event->result['ownerId'];
-            }
-            if (isset($event->result['ownerModel'])) {
-                $ownerModel = $event->result['ownerModel'];
-            }
-        }
-
-        $currentTokens = $this->loadModel('OAuthServer.AccessTokens')
+        $currentTokens = $this
+            ->loadModel('OAuthServer.AccessTokens')
             ->find()
             ->where(['expires > ' => Time::now()->getTimestamp()])
             ->matching('Sessions', function (Query $q) use ($ownerModel, $ownerId, $clientId) {
                 return $q->where([
                     'owner_model' => $ownerModel,
-                    'owner_id' => $ownerId,
-                    'client_id' => $clientId
+                    'owner_id'    => $ownerId,
+                    'client_id'   => $clientId,
                 ]);
             })
             ->count();
 
         if ($currentTokens > 0 || ($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
             $redirectUri = $this->authCodeGrant->newAuthorizeRequest($ownerModel, $ownerId, $this->authParams);
-
-            $event = new Event('OAuthServer.afterAuthorize', $this);
-            EventManager::instance()->dispatch($event);
-
+            EventManager::instance()->dispatch(new Event('OAuthServer.afterAuthorize', $this));
             return $this->redirect($redirectUri);
         } elseif ($this->request->is('post')) {
-            $event = new Event('OAuthServer.afterDeny', $this);
-            EventManager::instance()->dispatch($event);
 
-            $error = new AccessDeniedException();
-
-            $redirectUri = RedirectUri::make($this->authParams['redirect_uri'], [
-                'error' => $error->errorType,
-                'message' => $error->getMessage()
-            ]);
-
-            return $this->redirect($redirectUri);
         }
 
-        $this->set('authParams', $this->authParams);
-        $this->set('user', $this->Auth->user());
-        $this->set('_serialize', array_merge(['user', 'authParams'], $serializeKeys));
+        /*try {
+             // Validate the HTTP request and return an AuthorizationRequest object.
+             // The auth request object can be serialized into a user's session
+             $authRequest = $authServer->validateAuthorizationRequest($request);
 
-        return null;
+             // Once the user has logged in set the user on the AuthorizationRequest
+             $authRequest->setUser(new UserEntity()); // @TODO implement UserEntityInterface
+
+             // Once the user has approved or denied the client update the status
+             // (true = approved, false = denied)
+             $authRequest->setAuthorizationApproved(true);
+
+             // Return the HTTP redirect response
+             return $authServer->completeAuthorizationRequest($authRequest, $response);
+         } catch (OAuthServerException $exception) {
+             return $exception->generateHttpResponse($response);
+         } catch (\Exception $exception) {
+             $body = new Stream('php://temp', 'r+');
+             $body->write($exception->getMessage());
+
+             return $response->withStatus(500)->withBody($body);
+         }*/
+
+        try {
+            $response = $this->server->respondToAccessTokenRequest($request, $response);
+        } catch (OAuthServerException $exception) {
+            return $exception->generateHttpResponse($response);
+            // @codeCoverageIgnoreStart
+        } catch (Exception $exception) {
+            return (new OAuthServerException($exception->getMessage(), 0, 'unknown_error', 500))
+                ->generateHttpResponse($response);
+            // @codeCoverageIgnoreEnd
+        }
+
     }
 
     /**
+     * Access token action handler
+     *
+     * @return Response
+     * @TODO JSON seems to be the standard, but improve content type handling?
+     */
+    public function accessToken(): Response
+    {
+
+
+        $authServer = new \League\OAuth2\Server\AuthorizationServer(); // @TODO get proper auth server
+        try {
+            return $authServer->respondToAccessTokenRequest($request, $response);
+        } catch (OAuthServerException $exception) {
+            return $exception->generateHttpResponse($response);
+        } catch (PhpException $exception) {
+            return (new OAuthServerException($exception->getMessage(), 0, 'unknown_error', 500))
+                ->generateHttpResponse($response);
+        }
+    }
+
+    /**
+     * Service status, documentation and operation parameters
+     *
      * @return void
      */
-    public function accessToken()
+    public function status()
     {
-        try {
-            $response = $this->OAuth->Server->issueAccessToken();
-            $this->set($response);
-            $this->set('_serialize', array_keys($response));
-        } catch (OAuthException $e) {
-            // ignoring $e->getHttpHeaders() for now
-            // it only sends WWW-Authenticate header in case of InvalidClientException
-            throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
-        }
+        // document (https://www.oauth.com/oauth2-servers/creating-documentation/)
+        // - client Registration
+        // - available endpoints
+        // - service status
+        // - supported grant types
+        // - supported extensions / access token response
+        // - supports refresh tokens and under which conditions / grant types,
+        // - access token and refresh token TTL
     }
 }

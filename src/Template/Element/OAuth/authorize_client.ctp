@@ -1,0 +1,1 @@
+<h1><?= $authParams['client']->getName() ?> would like to access:</h1>

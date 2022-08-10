@@ -1,98 +1,66 @@
 <?php
+
 namespace OAuthServer\Auth;
 
 use Cake\Auth\BaseAuthenticate;
-use Cake\Controller\ComponentRegistry;
-use Cake\Core\App;
-use Cake\Database\Exception;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Network\Exception\BadRequestException;
-use Cake\Network\Exception\HttpException;
+use Cake\Log\Log;
 use Cake\Network\Request;
 use Cake\Network\Response;
-use Cake\ORM\TableRegistry;
-use League\OAuth2\Server\Exception\OAuthException;
-use OAuthServer\Traits\GetStorageTrait;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\ResourceServer;
+use OAuthServer\Exception\Exception;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+use OAuthServer\Plugin;
+use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * The CakePHP OAuth 2.0 Authenticate object
+ *
+ * This 'Authenticate' object is the protection layer
+ * of the accessible resources (resource server section of the application)
+ * that are made available to the access token
+ */
 class OAuthAuthenticate extends BaseAuthenticate
 {
-    use GetStorageTrait;
-
     /**
-     * @var \League\OAuth2\Server\ResourceServer
-     */
-    public $Server;
-
-    /**
-     * Exception that was thrown by oauth server
+     * OAuth 2.0 resource server object
      *
-     * @var \League\OAuth2\Server\Exception\OAuthException
+     * @var ResourceServer
      */
-    protected $_exception;
+    protected ResourceServer $_resourceServer;
 
     /**
-     * @var array
+     * Exception that was thrown by OAuth 2.0 server
+     *
+     * @var OAuthServerException|null
      */
-    protected $_defaultConfig = [
-        'continue' => false,
-        'storages' => [
-            'session' => [
-                'className' => 'OAuthServer.Session'
-            ],
-            'accessToken' => [
-                'className' => 'OAuthServer.AccessToken'
-            ],
-            'client' => [
-                'className' => 'OAuthServer.Client'
-            ],
-            'scope' => [
-                'className' => 'OAuthServer.Scope'
-            ]
-        ],
-        'resourceServer' => [
-            'className' => 'League\OAuth2\Server\ResourceServer'
-        ],
-        'contain' => null
+    protected ?OAuthServerException $_exception;
+
+    /**
+     * Attributes the resource server adds upon authenticating the request
+     * that identify the request to a user or client
+     *
+     * @var string[]
+     */
+    protected array $userIdentifiableAttributes = [
+        'oauth_access_token_id',
+        'oauth_client_id',
+        'oauth_user_id',
+        'oauth_scopes',
     ];
 
     /**
-     * @param \Cake\Controller\ComponentRegistry $registry Component registry
-     * @param array $config Config array
+     * @inheritDoc
      */
-    public function __construct(ComponentRegistry $registry, $config)
+    public function __construct(ComponentRegistry $registry, array $config)
     {
         parent::__construct($registry, $config);
-
-        if ($this->config('server')) {
-            $this->Server = $this->config('server');
-
-            return;
-        }
-
-        $serverConfig = $this->config('resourceServer');
-        $serverClassName = App::className($serverConfig['className']);
-
-        if (!$serverClassName) {
-            throw new Exception('ResourceServer class was not found.');
-        }
-
-        $server = new $serverClassName(
-            $this->_getStorage('session'),
-            $this->_getStorage('accessToken'),
-            $this->_getStorage('client'),
-            $this->_getStorage('scope')
-        );
-
-        $this->Server = $server;
+        $this->_resourceServer = Plugin::instance()->getResourceServer();
     }
 
     /**
-     * Authenticate a user based on the request information.
-     *
-     * @param \Cake\Network\Request $request Request to get authentication information from.
-     * @param \Cake\Network\Response $response A response object that can have headers added.
-     * @return bool
+     * @inheritDoc
      */
     public function authenticate(Request $request, Response $response)
     {
@@ -100,65 +68,86 @@ class OAuthAuthenticate extends BaseAuthenticate
     }
 
     /**
-     * @param \Cake\Network\Request $request Request to get authentication information from.
-     * @param \Cake\Network\Response $response A response object that can have headers added.
-     * @return bool|\Cake\Network\Response
-     */
-    public function unauthenticated(Request $request, Response $response)
-    {
-        if ($this->_config['continue']) {
-            return false;
-        }
-        if (isset($this->_exception)) {
-            // ignoring $e->getHttpHeaders() for now
-            // it only sends WWW-Authenticate header in case of InvalidClientException
-            throw new HttpException($this->_exception->getMessage(), $this->_exception->httpStatusCode, $this->_exception);
-        }
-        $message = __d('authenticate', 'You are not authenticated.');
-        throw new BadRequestException($message);
-    }
-
-    /**
-     * @param \Cake\Network\Request $request Request object
-     * @return array|bool|mixed
+     * @inheritDoc
+     * @throws Exception
      */
     public function getUser(Request $request)
     {
-        try {
-            $this->Server->isValidRequest(true, $request->query('access_token'));
-        } catch (OAuthException $e) {
-            $this->_exception = $e;
-
+        if (!$request = $this->getValidatedRequestWithAuthAttributes($request)) {
             return false;
         }
-
-        $ownerModel = $this->Server
-            ->getAccessToken()
-            ->getSession()
-            ->getOwnerType();
-
-        $ownerId = $this->Server
-            ->getAccessToken()
-            ->getSession()
-            ->getOwnerId();
-
-        $options = [];
-
-        if ($this->_config['contain']) {
-            $options['contain'] = $this->_config['contain'];
+        $user = $this->getUserIdentifiableAttributesFromRequest($request);
+        if (!$this->dispatchGetUserEvent($request, $user)) {
+            return false;
         }
+        return $user;
+    }
 
-        $owner = TableRegistry::get($ownerModel)
-            ->get($ownerId, $options)
-            ->toArray();
+    /**
+     * Validate and add authentication attributes to the given request.
+     * Will set exception to $this->_exception if thrown from validation of request
+     *
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface|null Will return modified request or null if failed to validate
+     */
+    public function getValidatedRequestWithAuthAttributes(ServerRequestInterface $request): ?ServerRequestInterface
+    {
+        try {
+            // modified request
+            $request = $this->_resourceServer->validateAuthenticatedRequest($request);
+        } catch (OAuthServerException $e) {
+            Log::error($e);
+            $this->_exception = $e;
+            return null;
+        }
+        return $request;
+    }
 
-        $event = new Event('OAuthServer.getUser', $request, [$ownerModel, $ownerId, $owner]);
+    /**
+     * Extract request attributes to return as an identified OAuth 2.0 user
+     *
+     * @param ServerRequestInterface $request
+     * @return array e.g. ['oauth_client_id' => '123', ...]
+     * @throws Exception
+     */
+    public function getUserIdentifiableAttributesFromRequest(ServerRequestInterface $request): array
+    {
+        $user = array_intersect_key($request->getAttributes(), array_flip($this->userIdentifiableAttributes));
+        if (empty($user)) {
+            throw new Exception('Resource server is always expected to fulfill user attributes at this point');
+        }
+        return $user;
+    }
+
+    /**
+     * Throw event for any required user data hooks/mutations
+     *
+     * @param ServerRequestInterface  $request
+     * @param array                  &$user
+     * @return bool False if stopped
+     */
+    public function dispatchGetUserEvent(ServerRequestInterface $request, array &$user): bool
+    {
+        $event = new Event('OAuthServer.getUser', $request, $user);
         EventManager::instance()->dispatch($event);
-
-        if ($event->result !== null) {
-            return $event->result;
-        } else {
-            return $owner;
+        if (is_array($event->result)) {
+            $user = $event->result;
         }
+        if ($event->isStopped()) {
+            $msg = 'event %s was stopped for user %s';
+            Log::warning(sprintf($msg, $event->getName(), json_encode($user)));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Return exception that was thrown by OAuth 2.0 server
+     *
+     * @return OAuthServerException|null
+     */
+    public function getException(): ?OAuthServerException
+    {
+        return $this->_exception;
     }
 }

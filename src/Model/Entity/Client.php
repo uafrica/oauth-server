@@ -2,45 +2,53 @@
 
 namespace OAuthServer\Model\Entity;
 
+use Cake\Datasource\EntityInterface;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Security;
-use Cake\Utility\Text;
+use OAuthServer\Lib\Data\Entity\Client as ClientData;
 
+/**
+ * OAuth 2.0 client entity
+ *
+ * @property string          $id
+ * @property string          $client_secret
+ * @property string          $name
+ * @property string          $redirect_uri
+ * @property string|null     $parent_model
+ * @property int|null        $parent_id
+ * @property EntityInterface $parent
+ *
+ * @property Client[]|null   $clients
+ */
 class Client extends Entity
 {
     /**
-     * Create a new, pretty (as in moderately, not beautiful - that can't be guaranteed ;-) random client secret
+     * When there is an implicit belongsTo relationship this virtual
+     * property getter will return the associated entity
      *
-     * @return void
+     * @return EntityInterface|null
      */
-    public function generateSecret()
-    {
-        $this->client_secret = Security::hash(Text::uuid(), 'sha1', true);
-        $this->_original['client_secret'] = $this->client_secret;
-    }
-
-    /**
-     * @return \Cake\Datasource\EntityInterface|mixed|null
-     */
-    protected function _getParent()
+    protected function _getParent(): ?EntityInterface
     {
         if (empty($this->parent_model)) {
             return null;
         }
-        $parentTable = TableRegistry::get($this->parent_model);
-
-        return $parentTable->get($this->parent_id);
+        $table = TableRegistry::get($this->parent_model);
+        return $table->get($this->parent_id);
     }
 
     /**
-     * @param string $name Existing name
-     * @return string
+     * Transforms the ORM Entity object into an OAuth 2.0 server DTO object
+     *
+     * @return ClientData
      */
-    protected function _getName($name)
+    public function transformToDTO(): ClientData
     {
-        $parent = $this->parent;
-
-        return $parent ? $parent->name : $name;
+        $dto = new ClientData();
+        $dto->setIdentifier($this->id);
+        $dto->setName($this->name);
+        $dto->setRedirectUri($this->redirect_uri);
+        $dto->setIsConfidential(!empty($this->client_secret));
+        return $dto;
     }
 }
