@@ -34,7 +34,7 @@ class OAuthComponent extends Component
         parent::initialize($config);
         $this->loadRepository('AccessTokens', Repository::ACCESS_TOKEN());
         $this->loadRepository('Users', Repository::USER());
-        $this->loadRepository('Scopes', Repository::USER());
+        $this->loadRepository('Scopes', Repository::SCOPE());
     }
 
     /**
@@ -81,7 +81,7 @@ class OAuthComponent extends Component
      * @param string|null $userId
      * @return bool True if active access tokens
      */
-    public function hasActiveAccessTokens(string $clientId, ?string $userId): bool
+    public function hasActiveAccessTokens(string $clientId, ?string $userId = null): bool
     {
         $options = ['client_id' => $clientId, 'user_id' => $userId];
         return !!$this->AccessTokens->find('active', $options)->count();
@@ -102,7 +102,8 @@ class OAuthComponent extends Component
             ->find()
             ->whereInList($primaryKey, $ids, ['allowEmpty' => true])
             ->all()
-            ->indexBy($primaryKey);
+            ->indexBy($primaryKey)
+            ->toArray();
         foreach ($scopes as $scope) {
             $id = $scope->getIdentifier();
             if ($scope instanceof ScopeData && isset($entities[$id]->description)) {

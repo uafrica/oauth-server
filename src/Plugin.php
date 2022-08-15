@@ -14,9 +14,11 @@ use League\OAuth2\Server\ResourceServer;
 use OAuthServer\Lib\Enum\GrantType;
 use OAuthServer\Lib\Enum\Repository;
 use OAuthServer\Lib\Factory;
+use DateInterval;
 use InvalidArgumentException;
 use LogicException;
 use Exception;
+use function Functional\map;
 
 /**
  * OAuth 2.0 plugin object
@@ -26,6 +28,21 @@ use Exception;
 class Plugin extends BasePlugin
 {
     use EmitterAwareTrait;
+
+    /**
+     * Get the instance from the Cake application's plugin collection
+     *
+     * @return Plugin
+     * @throws LogicException
+     */
+    public static function instance(): Plugin
+    {
+        $name = 'OAuthServer';
+        if (!$plugin = CakePlugin::getCollection()->get($name)) {
+            throw new LogicException(sprintf('plugin %s not loaded', $name));
+        }
+        return $plugin;
+    }
 
     /**
      * Get the OAuth 2.0 server private key object
@@ -121,7 +138,7 @@ class Plugin extends BasePlugin
     public function getAuthorizationServer(): AuthorizationServer
     {
         $configuredRepositories  = Configure::read('OAuthServer.mapping') ?? [];
-        $configuredRefreshTokens = Configure::read('OAuthServer.refreshTokens');
+        $configuredRefreshTokens = Configure::read('OAuthServer.refreshTokensEnabled');
         $privateKey              = $this->getPrivateKey();
         $encryptionKey           = $this->getEncryptionKey();
         $server                  = Factory::authorizationServer($privateKey, $encryptionKey, $configuredRepositories);
@@ -161,17 +178,50 @@ class Plugin extends BasePlugin
     }
 
     /**
-     * Get the instance from the Cake application's plugin collection
+     * Get the token time to live DateInterval objects by token type enum key
      *
-     * @return Plugin
-     * @throws LogicException
+     * @return DateInterval[] e.g. [Token::ACCESS_TOKEN => Object(DateInterval), ...]
+     * @throws InvalidArgumentException
      */
-    public static function instance(): Plugin
+    public function getTokensTimeToLiveIntervals(): array
     {
-        $name = 'OAuthServer';
-        if (!$plugin = CakePlugin::getCollection()->get($name)) {
-            throw new LogicException(sprintf('plugin %s not loaded', $name));
+        $mapping = Configure::read('OAuthServer.ttl') ?? [];
+        return Factory::timeToLiveIntervals($mapping);
+    }
+
+    /**
+     * Get status parameters
+     *
+     *   service_status: 'disabled' or 'enabled'
+     *   grant_types: ['authorization_code']
+     *   extensions: ['openid_connect']
+     *   refresh_tokens_enabled: true or false
+     *   token_ttl_seconds: ['access_token': 86400, 'refresh_token': 86400, ...]
+     *
+     * @return array
+     */
+    public function getStatus(): array
+    {
+        $status = [];
+        if ($clientRegistrationUrl = Configure::read('OAuthServer.clientRegistrationUrl')) {
+            $status['client_registration_url'] = $clientRegistrationUrl;
         }
-        return $plugin;
+        $status['service_status']         = Configure::read('OAuthServer.serviceDisabled') ? 'disabled' : 'enabled';
+        $status['grant_types']            = map(Plugin::instance()->getGrantObjects(), fn(GrantTypeInterface $grant) => $grant->getIdentifier());
+        $status['extensions']             = [];
+        $status['refresh_tokens_enabled'] = !!Configure::read('OAuthServer.refreshTokensEnabled');
+        $ttl                              = Plugin::instance()->getTokensTimeToLiveIntervals();
+        $status['token_ttl_seconds']      = map($ttl, fn(DateInterval $interval) => Factory::intervalTimestamp($interval));
+        return $status;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function getPath()
+    {
+        // @TODO for some reason path is not giving back trailing slash so add it back here but find out why sometime
+        return rtrim(parent::getPath(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 }

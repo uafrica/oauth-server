@@ -46,7 +46,7 @@ class Repository extends Enum
             static::CLIENT        => 'OAuthServer.Clients',
             static::REFRESH_TOKEN => 'OAuthServer.RefreshTokens',
             static::SCOPE         => 'OAuthServer.Scopes',
-            // static::USER has no default repository, up to implementation of application
+            static::USER          => 'Users' // application implementation (plugin has no users implementation)
         ];
         return static::enum($value, $aliases);
     }

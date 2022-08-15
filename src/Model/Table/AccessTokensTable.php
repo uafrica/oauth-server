@@ -15,6 +15,7 @@ use OAuthServer\Lib\Data\Entity\AccessToken as AccessTokenData;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use function Functional\map;
 use Exception;
+use Cake\ORM\Query;
 
 /**
  * OAuth 2.0 access tokens table
@@ -116,7 +117,7 @@ class AccessTokensTable extends Table implements AccessTokenRepositoryInterface
         $optionsResolver->setAllowedTypes('client_id', 'string');
         $optionsResolver->setAllowedTypes('user_id', ['string', 'null']);
         $options = $optionsResolver->resolve($options);
-        // @TODO maybe check refresh tokens as well?
+        // not checking refresh tokens depending on the extent of activity required may be added later
         return $query->where(['expires >' => Time::now()->getTimestamp()] + $options);
     }
 }

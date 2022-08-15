@@ -9,6 +9,8 @@ use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
 use OAuthServer\Model\Entity\AuthCode;
 use OAuthServer\Lib\Data\Entity\AuthCode as AuthCodeData;
+use function Functional\map;
+use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
 /**
  * OAuth 2.0 authorisation codes table
@@ -56,11 +58,11 @@ class AuthCodesTable extends Table implements AuthCodeRepositoryInterface
         $entity = $this->newEntity([
             'code'             => $authCodeEntity->getIdentifier(),
             'expires'          => $authCodeEntity->getExpiryDateTime()->getTimestamp(),
-            'client_id'        => $accessTokenEntity->getClient()->getIdentifier(),
-            'user_id'          => $accessTokenEntity->getUserIdentifier(),
+            'client_id'        => $authCodeEntity->getClient()->getIdentifier(),
+            'user_id'          => $authCodeEntity->getUserIdentifier(),
             'redirect_uri'     => $authCodeEntity->getRedirectUri(),
-            'auth_code_scopes' => map($accessTokenEntity->getScopes(), fn(ScopeEntityInterface $scope) => [
-                'oauth_token' => $accessTokenEntity->getIdentifier(),
+            'auth_code_scopes' => map($authCodeEntity->getScopes(), fn(ScopeEntityInterface $scope) => [
+                'oauth_token' => $authCodeEntity->getIdentifier(),
                 'scope_id'    => $scope->getIdentifier(),
             ]),
         ]);

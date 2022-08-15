@@ -2,7 +2,6 @@
 
 namespace OAuthServer\Lib;
 
-use Cake\Core\Configure;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Security;
 use Cake\Utility\Text;
@@ -24,6 +23,7 @@ use OAuthServer\Lib\Enum\GrantType;
 use OAuthServer\Lib\Enum\Repository;
 use InvalidArgumentException;
 use DateInterval;
+use DateTime;
 use OAuthServer\Lib\Enum\Token;
 use function Functional\map;
 
@@ -94,6 +94,20 @@ class Factory
     }
 
     /**
+     * Converts DateInterval object into UNIX timestamp
+     *
+     * @param DateInterval $interval
+     * @return int Seconds since the Unix Epoch (January 1 1970 00:00:00 GMT)
+     */
+    public static function intervalTimestamp(DateInterval $interval): int
+    {
+        $now  = new DateTime();
+        $then = clone $now;
+        $then = $then->add($interval);
+        return $then->getTimestamp() - $now->getTimestamp();
+    }
+
+    /**
      * Get OAuth 2.0 required repository objects
      *
      * @param string[] $mapping e.g. [Repository::AUTH_CODE => 'MyPlugin.MyTable']
@@ -154,7 +168,7 @@ class Factory
                 $grantObject = new AuthCodeGrant(
                     $repositories[Repository::AUTH_CODE],
                     $repositories[Repository::REFRESH_TOKEN],
-                    $ttlMapping[Token::AUTHENTICATION_TOKEN]
+                    $ttl[Token::AUTHENTICATION_TOKEN]
                 );
                 break;
             case GrantType::REFRESH_TOKEN:
