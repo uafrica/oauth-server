@@ -9,7 +9,7 @@ Implementation of package `steverhoades/oauth2-openid-connect-server`
 ### Optional status endpoint
 Visit using `oauth/status`
 ### Unit and integration tests
-Run using `compsoser install` and `composer test`
+Run using `composer install` and `composer test`
 ## Installation
 ### Composer
 Installation is done using composer. Run:
