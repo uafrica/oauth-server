@@ -106,7 +106,7 @@ class Plugin extends BasePlugin
     {
         $configuredGrantTypes   = Configure::read('OAuthServer.grants') ?? [];
         $configuredTtl          = Configure::read('OAuthServer.ttl') ?? [];
-        $configuredRepositories = Configure::read('OAuthServer.mapping') ?? [];
+        $configuredRepositories = Configure::read('OAuthServer.repositories') ?? [];
 
         $privateKey    = $this->getPrivateKey();
         $encryptionKey = $this->getEncryptionKey();
@@ -137,7 +137,7 @@ class Plugin extends BasePlugin
      */
     public function getAuthorizationServer(): AuthorizationServer
     {
-        $configuredRepositories  = Configure::read('OAuthServer.mapping') ?? [];
+        $configuredRepositories  = Configure::read('OAuthServer.repositories') ?? [];
         $configuredRefreshTokens = Configure::read('OAuthServer.refreshTokensEnabled');
         $privateKey              = $this->getPrivateKey();
         $encryptionKey           = $this->getEncryptionKey();
@@ -158,7 +158,7 @@ class Plugin extends BasePlugin
      */
     public function getResourceServer(): ResourceServer
     {
-        $configuredRepositories = Configure::read('OAuthServer.mapping') ?? [];
+        $configuredRepositories = Configure::read('OAuthServer.repositories') ?? [];
         $publicKey              = $this->getPublicKey();
         return Factory::resourceServer($publicKey, $configuredRepositories);
     }
@@ -172,7 +172,7 @@ class Plugin extends BasePlugin
      */
     public function getRepository(Repository $repository): RepositoryInterface
     {
-        $configuredRepositories = Configure::read('OAuthServer.mapping') ?? [];
+        $configuredRepositories = Configure::read('OAuthServer.repositories') ?? [];
         $repositories           = Factory::repositories($configuredRepositories);
         return $repositories[$repository->getValue()];
     }
@@ -214,7 +214,6 @@ class Plugin extends BasePlugin
         $status['token_ttl_seconds']      = map($ttl, fn(DateInterval $interval) => Factory::intervalTimestamp($interval));
         return $status;
     }
-
 
     /**
      * @inheritDoc

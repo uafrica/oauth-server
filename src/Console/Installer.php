@@ -23,7 +23,9 @@ class Installer
     public static function postInstall(Event $event)
     {
         $io = $event->getIO();
-        define('DS', DIRECTORY_SEPARATOR);
+        if (!defined('DS')) {
+            define('DS', DIRECTORY_SEPARATOR);
+        }
         $rootDir = dirname(dirname(__DIR__)) . DS;
         static::setExampleKeyPermissionsForTest($rootDir, $io);
     }

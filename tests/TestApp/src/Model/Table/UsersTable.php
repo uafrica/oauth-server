@@ -21,6 +21,9 @@ class UsersTable extends Table implements UserRepositoryInterface
             ->find()
             ->where(compact('username', 'password'))
             ->first();
+        if (!$entity) {
+            return null;
+        }
         $data   = new User();
         $data->setIdentifier($entity->id);
         return $data;

@@ -133,7 +133,7 @@ class PluginTest extends TestCase
     {
         $status = $this->plugin->getStatus();
         $this->assertInternalType('array', $status);
-        foreach (['status', 'grant_types', 'extensions', 'refresh_tokens', 'token_ttl_seconds'] as $key) {
+        foreach (['service_status', 'grant_types', 'extensions', 'refresh_tokens_enabled', 'token_ttl_seconds'] as $key) {
             $this->assertArrayHasKey($key, $status);
         }
     }

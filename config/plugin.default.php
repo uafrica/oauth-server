@@ -22,7 +22,7 @@ return [
         ],
         // maps required OAuth 2.0 repositories to table locator alias strings, defaults available in an enumeration object
         'repositories'         => [
-            \OAuthServer\Lib\Enum\Repository::ACCESS_TOKEN => 'OAuthServer.AccessTokens',
+            \OAuthServer\Lib\Enum\Repository::USER => 'Users',
         ],
         'grants'               => [
             \OAuthServer\Lib\Enum\GrantType::REFRESH_TOKEN,
