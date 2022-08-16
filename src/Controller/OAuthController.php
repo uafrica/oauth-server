@@ -108,6 +108,7 @@ class OAuthController extends AppController
             if ($this->OAuth->hasActiveAccessTokens($clientId, $user->getIdentifier())) {
                 $authRequest->setAuthorizationApproved(true);
                 $eventManager->dispatch(new Event('OAuthServer.afterAuthorize', $this));
+                // redirect
                 return $this->authorizationServer->completeAuthorizationRequest($authRequest, $this->response);
             }
 
@@ -120,19 +121,22 @@ class OAuthController extends AppController
                 } else {
                     $eventManager->dispatch(new Event('OAuthServer.afterDeny', $this));
                 }
+                // redirect
                 return $this->authorizationServer->completeAuthorizationRequest($authRequest, $this->response);
             }
         } catch (OAuthServerException $exception) {
+            // @TODO this is a JSON response ..?
             return $exception->generateHttpResponse($response);
         } catch (Exception $exception) {
             $body = new Stream('php://temp', 'r+');
             $body->write($exception->getMessage());
+            // @TODO this is a blank page with an exception message?
             return $response->withStatus(500)->withBody($body);
         }
 
         $this->OAuth->enrichScopes(...$authRequest->getScopes());
         $this->set('authRequest', $authRequest);
-        return $this->response;
+        return $this->render();
     }
 
     /**
