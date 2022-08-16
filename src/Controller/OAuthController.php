@@ -69,18 +69,14 @@ class OAuthController extends AppController
         if (Configure::read('OAuthServer.serviceDisabled')) {
             throw new ServiceNotAvailableException();
         }
-        $mode = new IndexMode(Configure::read('OAuthServer.indexMode') ?? IndexMode::DISABLED);
-        switch ($mode->getValue()) {
-            case IndexMode::REDIRECT_TO_AUTHORIZE:
-                return $this->redirect([
-                    'action' => 'authorize',
-                    '_ext'   => $this->request->param('_ext'),
-                    '?'      => $this->request->query,
-                ], 301);
-            case IndexMode::REDIRECT_TO_STATUS:
-                return $this->redirect(['action' => 'status']);
+        if (Configure::read('OAuthServer.indexRedirectDisabled')) {
+            throw new NotFoundException();
         }
-        throw new NotFoundException();
+        return $this->redirect([
+            'action' => 'authorize',
+            '_ext'   => $this->request->param('_ext'),
+            '?'      => $this->request->query,
+        ], 301);
     }
 
     /**

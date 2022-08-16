@@ -59,9 +59,9 @@ class OAuthControllerTest extends IntegrationTestCase
     /**
      * @return void
      */
-    public function testOauthRedirectsToAuthorize(): void
+    public function testOAuthIndexRedirectsToAuthorize(): void
     {
-        Configure::write('OAuthServer.indexMode', IndexMode::REDIRECT_TO_AUTHORIZE);
+        Configure::write('OAuthServer.indexRedirectDisabled', false);
         $this->session(['Auth.User.id' => 5]);
         $this->get($this->url("/oauth") . "?client_id=CID&anything=at_all");
         $this->assertRedirect(['controller' => 'OAuth', 'action' => 'authorize', '?' => ['client_id' => 'CID', 'anything' => 'at_all']]);
@@ -70,20 +70,9 @@ class OAuthControllerTest extends IntegrationTestCase
     /**
      * @return void
      */
-    public function testOauthRedirectsToStatus(): void
+    public function testOAuthIndexRedirectsToDisabled(): void
     {
-        Configure::write('OAuthServer.indexMode', IndexMode::REDIRECT_TO_STATUS);
-        $this->session(['Auth.User.id' => 5]);
-        $this->get($this->url("/oauth") . "?client_id=CID&anything=at_all");
-        $this->assertRedirect(['controller' => 'OAuth', 'action' => 'status']);
-    }
-
-    /**
-     * @return void
-     */
-    public function testOauthRedirectsToDisabled(): void
-    {
-        Configure::write('OAuthServer.indexMode', IndexMode::DISABLED);
+        Configure::write('OAuthServer.indexRedirectDisabled', true);
         $this->session(['Auth.User.id' => 5]);
         $this->get($this->url("/oauth") . "?client_id=CID&anything=at_all");
         $this->assertResponseCode(404);
